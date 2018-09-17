@@ -1,3 +1,4 @@
+aws ssm start-session --target $InstanceId
 sudo su ec2-user
 cd ~
 cat /var/log/cloud-init-output.log
@@ -9,3 +10,6 @@ mac=$(curl http://169.254.169.254/latest/meta-data/mac)
 curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/$mac/vpc-id
 curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/$mac/subnet-
 curl http://169.254.169.254/latest/user-data
+
+exit
+exit
