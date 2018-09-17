@@ -18,13 +18,13 @@ aws iam create-instance-profile --instance-profile-name Webserver
 aws iam create-role --role-name Webserver --assume-role-policy-document file://ec2-role-trust-policy.json
 aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM --role-name Webserver
 aws iam add-role-to-instance-profile --role-name Webserver --instance-profile-name Webserver
-
+sleep 5
 InstanceId=$(aws ec2 run-instances \
 --image-id ami-04681a1dbd79675a5 \
 --count 1 \
 --instance-type t2.micro \
 --subnet-id $PublicSubnet1 \
---security-group-ids $sgGroupId \
+--security-group-ids $SgGroupId \
 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Ex3WebServer}]' \
 --iam-instance-profile Name=Webserver \
 --user-data file://UserDataScript.txt \
