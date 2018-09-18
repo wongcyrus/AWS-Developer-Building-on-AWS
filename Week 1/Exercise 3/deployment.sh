@@ -18,7 +18,7 @@ aws iam create-instance-profile --instance-profile-name Webserver
 aws iam create-role --role-name Webserver --assume-role-policy-document file://ec2-role-trust-policy.json
 aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM --role-name Webserver
 aws iam add-role-to-instance-profile --role-name Webserver --instance-profile-name Webserver
-sleep 5
+sleep 10
 InstanceId=$(aws ec2 run-instances \
 --image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --query 'Parameters[0].[Value]' --output text) \
 --count 1 \
