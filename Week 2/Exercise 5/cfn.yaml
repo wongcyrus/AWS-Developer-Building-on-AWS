@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+    License: Apache-2.0
+Description: 'Build on AWS Project Stack.'
+Parameters:
+    SourceBucket:
+        Type: String
+        Description: Source Bucket with nested cloudformation template
+    Password:
+        NoEcho: 'true'
+        Type: String
+        Description: New account password
+        MinLength: '1'
+        MaxLength: '41'
+        ConstraintDescription: the password must be between 1 and 41 characters
+Resources:
+    IAMStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/iam.yaml' 
+            TimeoutInMinutes: 5
+            Parameters: 
+                Password: !Ref Password
+                
+    VPCStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/vpc.yaml' 
+            TimeoutInMinutes: 5
+
+    EdxProjectCloud9:            
+        Type: AWS::Cloud9::EnvironmentEC2
+        Properties:
+            OwnerArn: !GetAtt IAMStack.Outputs.EdXProjectUser
+            Description: Building On AWS Cloud9
+            AutomaticStopTimeMinutes: 30
+            InstanceType: t2.micro
+            Name: BuildingOnAWS
+            SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1
+            
+Outputs:
+    EdxProjectCloud9:
+        Value: !Ref EdxProjectCloud9
+        Description: Edx User Cloud9
+    AccessKey:
+        Value: !GetAtt IAMStack.Outputs.AccessKey
+        Description: AWSAccessKeyId of new user
+    SecretKey:
+        Value: !GetAtt IAMStack.Outputs.SecretKey
+        Description: AWSSecretKey of new user

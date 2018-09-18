@@ -1,5 +1,5 @@
 export AWS_DEFAULT_REGION=us-east-1
-aws cloudformation create-stack --stack-name edx-vpc-stack --template-body file://vpc.template 
+aws cloudformation create-stack --stack-name edx-vpc-stack --template-body file://vpc.yaml 
 aws cloudformation wait stack-create-complete --stack-name edx-vpc-stack
 VPC=$(aws cloudformation describe-stacks --stack-name edx-vpc-stack \
 --query 'Stacks[0].Outputs[?OutputKey==`VPC`].OutputValue' --output text)

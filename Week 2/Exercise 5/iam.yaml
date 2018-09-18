@@ -14,9 +14,6 @@ Description: 'AWS CloudFormation Sample Template IAM_Users_Groups_and_Policies: 
     this template creates IAM resources or by specifying the CAPABILITY_IAM flag to
     the cfn-create-stack command line tool or CreateStack API call. '
 Parameters:
-    SourceBucket:
-        Type: String
-        Description: Source Bucket with nested cloudformation template
     Password:
         NoEcho: 'true'
         Type: String
@@ -81,13 +78,10 @@ Resources:
         Type: AWS::IAM::AccessKey
         Properties:
             UserName: !Ref 'CFNUser'
-    
-    VPCStack:  
-        Type: AWS::CloudFormation::Stack
-        Properties:
-            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/vpc.yaml' 
-            TimeoutInMinutes: 5
+
 Outputs:
+    EdXProjectUser:
+        Value: !GetAtt CFNUser.Arn
     AccessKey:
         Value: !Ref 'CFNKeys'
         Description: AWSAccessKeyId of new user
