@@ -1,5 +1,6 @@
 export AWS_DEFAULT_REGION=us-east-1
 SourceBucket=auniquesourcebucketname
+ImageBucket=auniqueimagebucketname
 cp ../../Week\ 1/Exercise\ 3/vpc.yaml .
 aws s3api create-bucket --bucket $SourceBucket
 sleep 5
@@ -16,3 +17,5 @@ AWS_SECRET_ACCESS_KEY=$(aws cloudformation describe-stacks --stack-name edx-proj
 --query 'Stacks[0].Outputs[?OutputKey==`SecretKey`].OutputValue' --output text)
 export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+aws s3 mb s3://$ImageBucket --region us-west-2
+

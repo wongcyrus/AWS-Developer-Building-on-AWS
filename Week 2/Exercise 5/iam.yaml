@@ -30,6 +30,9 @@ Resources:
                 Password: !Ref 'Password'
     CFNUserGroup:
         Type: AWS::IAM::Group
+        Properties:
+            ManagedPolicyArns:
+                - arn:aws:iam::aws:policy/AWSCloud9User
     Users:
         Type: AWS::IAM::UserToGroupAddition
         Properties:
