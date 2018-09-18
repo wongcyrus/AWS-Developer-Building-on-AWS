@@ -5,7 +5,7 @@ VPC=$(aws cloudformation describe-stacks --stack-name edx-vpc-stack \
 --query 'Stacks[0].Outputs[?OutputKey==`VPC`].OutputValue' --output text)
 PublicSubnet1=$(aws cloudformation describe-stacks --stack-name edx-vpc-stack \
 --query 'Stacks[0].Outputs[?OutputKey==`PublicSubnet1`].OutputValue' --output text)
-SgGroupId=$(aws ec2 create-security-group \
+export SgGroupId=$(aws ec2 create-security-group \
 --description exercise3-sg \
 --group-name exercise4-sg \
 --vpc-id $VPC \
@@ -20,7 +20,7 @@ aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/Ama
 aws iam add-role-to-instance-profile --role-name Webserver --instance-profile-name Webserver
 sleep 5
 InstanceId=$(aws ec2 run-instances \
---image-id ami-04681a1dbd79675a5 \
+--image-id $(aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --query 'Parameters[0].[Value]' --output text) \
 --count 1 \
 --instance-type t2.micro \
 --subnet-id $PublicSubnet1 \
