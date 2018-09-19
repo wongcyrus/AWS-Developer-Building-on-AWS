@@ -40,7 +40,7 @@ Resources:
         Type: AWS::CloudFormation::Stack
         Properties:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
-            TimeoutInMinutes: 15
+            TimeoutInMinutes: 30
             Parameters:
                 EC2VpcId: !GetAtt VPCStack.Outputs.VPC
                 PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
