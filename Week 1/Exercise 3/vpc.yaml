@@ -1,4 +1,4 @@
-Description: Building on AWS VPC stack
+Description: Building on AWS VPC Stack
 Mappings:
   AWSRegionToAMI:
     us-west-2:
@@ -22,6 +22,41 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
+      
+  NAT:
+    DependsOn: AttachGateway
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP
+        - AllocationId
+      SubnetId:
+        Ref: PublicSubnet1
+      Tags:
+        - Key: foo
+          Value: bar
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NAT
+
+  PrivateRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: edx-routetable-private
+          
   PublicSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -70,6 +105,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
+      
   PrivateSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -92,6 +128,17 @@ Resources:
       Tags:
         - Key: Name
           Value: edx-subnet-private-b
+          
+  PrivateRouteAssociation1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet1
+  PrivateRouteAssociation2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet2
 Outputs:
   VPC:
     Description: VPC
