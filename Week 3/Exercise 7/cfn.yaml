@@ -9,10 +9,17 @@ Parameters:
     Password:
         NoEcho: 'true'
         Type: String
-        Description: New account and RDS password
+        Description: New account.
         MinLength: '1'
         MaxLength: '41'
         ConstraintDescription: the password must be between 1 and 41 characters
+    DBPassword:
+        NoEcho: 'true'
+        Type: String
+        Description: RDS Password.
+        MinLength: '1'
+        MaxLength: '41'
+        ConstraintDescription: the password must be between 1 and 41 characters        
 Resources:
     IAMStack:  
         Type: AWS::CloudFormation::Stack
@@ -33,12 +40,12 @@ Resources:
         Type: AWS::CloudFormation::Stack
         Properties:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
-            TimeoutInMinutes: 10
+            TimeoutInMinutes: 15
             Parameters:
                 EC2VpcId: !GetAtt VPCStack.Outputs.VPC
                 PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
                 PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
-                Password: !Ref Password
+                DBPassword: !Ref DBPassword
                 
     EdxProjectCloud9:            
         Type: AWS::Cloud9::EnvironmentEC2

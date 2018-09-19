@@ -9,7 +9,7 @@ Parameters:
         Type: String    
     PrivateSubnet2:
         Type: String    
-    Password:
+    DBPassword:
         NoEcho: 'true'
         Type: String
         Description: New account and RDS password
@@ -21,7 +21,9 @@ Resources:
         Type: AWS::RDS::DBSecurityGroup
         Properties: 
             EC2VpcId: !Ref EC2VpcId
-            CidrIp: 10.1.0.0/16
+            DBSecurityGroupIngress:
+                -
+                    CIDRIP: 10.1.0.0/16
             GroupDescription: "Frontend Access"
                      
     MyDBSubnetGroup:
@@ -43,7 +45,7 @@ Resources:
             Engine: "MySQL"
             MasterUsername: master
             MasterUserPassword: 
-              Ref: Password
+              Ref: DBPassword
             DBSubnetGroupName: !Ref MyDBSubnetGroup
             DBSecurityGroups: 
             - 
