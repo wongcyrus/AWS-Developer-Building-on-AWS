@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+    License: Apache-2.0
+Description: 'Build on AWS Project DB Stack.'
+Parameters:
+    EC2VpcId:
+        Type: String
+    PrivateSubnet1:
+        Type: String    
+    PrivateSubnet2:
+        Type: String    
+    Password:
+        NoEcho: 'true'
+        Type: String
+        Description: New account and RDS password
+        MinLength: '1'
+        MaxLength: '41'
+        ConstraintDescription: the password must be between 1 and 41 characters
+Resources:
+    DBSecurityGroup: 
+        Type: AWS::RDS::DBSecurityGroup
+        Properties: 
+            EC2VpcId: !Ref EC2VpcId
+            CidrIp: 10.1.0.0/16
+            GroupDescription: "Frontend Access"
+                     
+    MyDBSubnetGroup:
+        Type: "AWS::RDS::DBSubnetGroup"
+        Properties: 
+            DBSubnetGroupName: MyDBSubnetGroup
+            DBSubnetGroupDescription: MyDBSubnetGroup
+            SubnetIds:
+                - !Ref PrivateSubnet1
+                - !Ref PrivateSubnet2
+
+    MyDB: 
+        Type: AWS::RDS::DBInstance
+        Properties: 
+            DBInstanceIdentifier: edx-photos-db
+            DBName: Photos
+            AllocatedStorage: "20"
+            DBInstanceClass: "db.t2.micro"
+            Engine: "MySQL"
+            MasterUsername: master
+            MasterUserPassword: 
+              Ref: Password
+            DBSubnetGroupName: !Ref MyDBSubnetGroup
+            DBSecurityGroups: 
+            - 
+                Ref: DBSecurityGroup
+Outputs:
+    MyDB:
+        Value: !Ref MyDB
+        Description: MyDB

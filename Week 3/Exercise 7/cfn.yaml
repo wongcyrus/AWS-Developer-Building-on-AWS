@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+    License: Apache-2.0
+Description: 'Build on AWS Project Stack.'
+Parameters:
+    SourceBucket:
+        Type: String
+        Description: Source Bucket with nested cloudformation template
+    Password:
+        NoEcho: 'true'
+        Type: String
+        Description: New account and RDS password
+        MinLength: '1'
+        MaxLength: '41'
+        ConstraintDescription: the password must be between 1 and 41 characters
+Resources:
+    IAMStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/iam.yaml' 
+            TimeoutInMinutes: 5
+            Parameters: 
+                Password: !Ref Password
+                
+    VPCStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/vpc.yaml' 
+            TimeoutInMinutes: 5
+
+
+    DBStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
+            TimeoutInMinutes: 10
+            Parameters:
+                EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+                PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
+                PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
+                Password: !Ref Password
+                
+    EdxProjectCloud9:            
+        Type: AWS::Cloud9::EnvironmentEC2
+        Properties:
+            OwnerArn: !GetAtt IAMStack.Outputs.EdXProjectUser
+            Description: Building On AWS Cloud9
+            AutomaticStopTimeMinutes: 30
+            InstanceType: t2.micro
+            Name: BuildingOnAWS
+            SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1
+
+    ImageS3Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+          BucketName: !Sub 'imagebucket${AWS::AccountId}'
+
+Outputs:
+    EdxProjectCloud9:
+        Value: !Ref EdxProjectCloud9
+        Description: Edx User Cloud9
+    AccessKey:
+        Value: !GetAtt IAMStack.Outputs.AccessKey
+        Description: AWSAccessKeyId of new user.
+    SecretKey:
+        Value: !GetAtt IAMStack.Outputs.SecretKey
+        Description: AWSSecretKey of new user.
+    ImageS3Bucket:
+        Value: !Ref ImageS3Bucket
+        Description: Bucket to save images.
+    MyDB:
+        Value: !GetAtt DBStack.Outputs.MyDB
+        Description: MySQL RDS
