@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+    License: Apache-2.0
+Description: Build on AWS Project Security Stack.
+Parameters:
+    EC2VpcId:
+        Type: String
+    PrivateSubnet1:
+        Type: String    
+    PrivateSubnet2:
+        Type: String    
+    DBPassword:
+        NoEcho: 'true'
+        Type: String
+        Description: New account and RDS password
+        MinLength: '1'
+        MaxLength: '41'
+        ConstraintDescription: the password must be between 1 and 41 characters
+Resources:
+
+    WebServerRole: 
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: ec2-webserver-role
+            AssumeRolePolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                    - 
+                        Effect: "Allow"
+                        Principal: 
+                            Service: 
+                            - "ec2.amazonaws.com"
+                        Action: 
+                            - "sts:AssumeRole"
+            Path: "/"
+            ManagedPolicyArns: 
+                - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+                - "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
+    
+    WebServerInstanceProfile: 
+        Type: AWS::IAM::InstanceProfile
+        Properties: 
+            Path: "/"
+            Roles: 
+                - 
+                    Ref: "WebServerRole"
+
+    WebSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: web-server-sg
+            GroupDescription: HTTP traffic
+            VpcId: !Ref EC2VpcId
+            SecurityGroupIngress:
+                - 
+                    IpProtocol: tcp
+                    FromPort: 80
+                    ToPort: 80
+                    CidrIp: 0.0.0.0/0
+            SecurityGroupEgress:
+                -
+                    IpProtocol: tcp
+                    FromPort: 0
+                    ToPort: 65535
+                    CidrIp: 0.0.0.0/0
+
+    DBSecurityGroup: 
+        Type: AWS::RDS::DBSecurityGroup
+        Properties: 
+            EC2VpcId: !Ref EC2VpcId
+            DBSecurityGroupIngress:
+                -
+                    EC2SecurityGroupId: !Ref WebSecurityGroup
+            GroupDescription: Frontend Access
+
+Outputs:
+    WebServerInstanceProfile:
+        Value: !Ref WebServerInstanceProfile
+        Description: Web Server Instance Profile
+    WebSecurityGroup:
+        Value: !GetAtt WebSecurityGroup.GroupId
+        Description: WebSecurityGroup
+    DBSecurityGroup:
+        Value: !Ref DBSecurityGroup
+        Description: DBSecurityGroup

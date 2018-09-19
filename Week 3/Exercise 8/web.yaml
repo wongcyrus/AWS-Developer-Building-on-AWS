@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+    License: Apache-2.0
+Description: Build on AWS Project Security Stack.
+Parameters:
+    EC2VpcId:
+        Type: String
+    PrivateSubnet1:
+        Type: String    
+    PrivateSubnet2:
+        Type: String
+    WebServerInstanceProfile:
+        Type: String
+    WebSecurityGroup:
+        Type: String
+    LatestAmiId:
+        Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+        Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+Resources:
+    WebInstance1: 
+        Type: AWS::EC2::Instance
+        Properties: 
+            ImageId: !Ref LatestAmiId
+            IamInstanceProfile: !WebServerInstanceProfile
+            NetworkInterfaces: 
+                -   AssociatePublicIpAddress: true
+                    DeviceIndex: 0
+                    GroupSet: 
+                        - Ref: WebSecurityGroup
+                    SubnetId: 
+                        Ref: PrivateSubnet1
+Outputs:
+    WebServerInstanceProfile:
+        Value: !Ref WebServerInstanceProfile
+        Description: Web Server Instance Profile
+    WebSecurityGroup:
+        Value: !GetAtt WebSecurityGroup.GroupId
+        Description: WebSecurityGroup
+    DBSecurityGroup:
+        Value: !Ref DBSecurityGroup
+        Description: DBSecurityGroup
