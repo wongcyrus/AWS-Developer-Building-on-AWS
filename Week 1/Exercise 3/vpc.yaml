@@ -1,4 +1,4 @@
-Description: Building on AWS VPC
+Description: Building on AWS VPC stack
 Mappings:
   AWSRegionToAMI:
     us-west-2:

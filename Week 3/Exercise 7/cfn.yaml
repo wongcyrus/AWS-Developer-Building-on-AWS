@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata: 
     License: Apache-2.0
-Description: 'Build on AWS Project Stack.'
+Description: Build on AWS Project Stack.
 Parameters:
     SourceBucket:
         Type: String
@@ -34,7 +34,6 @@ Resources:
         Properties:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/vpc.yaml' 
             TimeoutInMinutes: 5
-
 
     DBStack:  
         Type: AWS::CloudFormation::Stack
@@ -75,6 +74,6 @@ Outputs:
     ImageS3Bucket:
         Value: !Ref ImageS3Bucket
         Description: Bucket to save images.
-    MyDB:
-        Value: !GetAtt DBStack.Outputs.MyDB
+    MyDBEndpoint:
+        Value: !GetAtt DBStack.Outputs.MyDBEndpoint
         Description: MySQL RDS
