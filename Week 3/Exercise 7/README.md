@@ -13,6 +13,15 @@ To run the Web apps, you need to install dependence with
 sudo pip-3.6  install -r exercise-rds/FlaskApp/requirements.txt
 
 
+SQL
+
+
+Use Photos
+
+
+Select * from photo;
+
+
 For Clean up,
 
 
