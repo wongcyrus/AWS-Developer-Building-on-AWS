@@ -60,6 +60,7 @@ Resources:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/web.yaml' 
             TimeoutInMinutes: 10
             Parameters:
+                SourceBucket: !Ref SourceBucket
                 EC2VpcId: !GetAtt VPCStack.Outputs.VPC
                 PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
                 PublicSubnet2: !GetAtt VPCStack.Outputs.PublicSubnet2
