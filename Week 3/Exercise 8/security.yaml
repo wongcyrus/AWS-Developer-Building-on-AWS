@@ -26,7 +26,21 @@ Resources:
                 - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
                 - "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
                 - "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-    
+            Policies: 
+                - 
+                  PolicyName: "ssm"
+                  PolicyDocument: 
+                    Version: "2012-10-17"
+                    Statement: 
+                      - 
+                        Effect: "Allow"
+                        Action: ssm:DescribeParameters
+                        Resource: "*"    
+                      - 
+                        Effect: "Allow"
+                        Action: ssm:GetParameters
+                        Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/edx-*"  
+
     WebServerInstanceProfile: 
         Type: AWS::IAM::InstanceProfile
         Properties: 

@@ -68,26 +68,24 @@ Resources:
                 PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
                 WebServerInstanceProfile: !GetAtt SecurityStack.Outputs.WebServerInstanceProfile
                 WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
- 
-    # EdxProjectCloud9:            
-    #     Type: AWS::Cloud9::EnvironmentEC2
-    #     Properties:
-    #         OwnerArn: !GetAtt IAMStack.Outputs.EdXProjectUser
-    #         Description: Building On AWS Cloud9
-    #         AutomaticStopTimeMinutes: 30
-    #         InstanceType: t2.micro
-    #         Name: BuildingOnAWS
-    #         SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1
+
+    ParametesStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/parameters.yaml' 
+            TimeoutInMinutes: 5
+            Parameters:
+                ImageS3Bucket: !Ref ImageS3Bucket
+                DBPassword: !Ref DBPassword
+                MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint
 
     ImageS3Bucket:
         Type: AWS::S3::Bucket
         Properties:
-          BucketName: !Sub 'imagebucket${AWS::AccountId}'
+            BucketName: !Sub 'imagebucket${AWS::AccountId}'
 
+            
 Outputs:
-    # EdxProjectCloud9:
-    #     Value: !Ref EdxProjectCloud9
-    #     Description: Edx User Cloud9
     AccessKey:
         Value: !GetAtt IAMStack.Outputs.AccessKey
         Description: AWSAccessKeyId of new user.
