@@ -49,7 +49,7 @@ Resources:
                     GroupSet: 
                         - Ref: WebSecurityGroup
                     SubnetId: 
-                        Ref: PrivateSubnet1
+                        Ref: PrivateSubnet2
             Tags:
             -
               Key: Name
@@ -62,8 +62,9 @@ Resources:
                 - Ref: PublicSubnet1
                 - Ref: PublicSubnet2
             LoadBalancerAttributes:
-                - Key: idle_timeout.timeout_seconds
-            Value: '50'
+                -   
+                    Key: idle_timeout.timeout_seconds
+                    Value: '50'
             SecurityGroups:
                 - Ref: WebSecurityGroup
 
@@ -82,7 +83,8 @@ Resources:
             Protocol: HTTP
             VpcId: !Ref EC2VpcId
             TargetGroupAttributes:
-                -   Key: deregistration_delay.timeout_seconds
+                -   
+                    Key: deregistration_delay.timeout_seconds
                     Value: 30                
             Targets:
             - Id:
@@ -96,7 +98,7 @@ Resources:
         Properties:
             DefaultActions:
             - Type: forward
-              TargetGroupArn: !Ref: DefaultTargetGroup
+              TargetGroupArn: !Ref DefaultTargetGroup
             LoadBalancerArn: !Ref LoadBalancer
             Port: 80
             Protocol: HTTP
