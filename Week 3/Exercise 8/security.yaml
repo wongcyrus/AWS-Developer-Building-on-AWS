@@ -5,17 +5,6 @@ Description: Build on AWS Project Security Stack.
 Parameters:
     EC2VpcId:
         Type: String
-    PrivateSubnet1:
-        Type: String    
-    PrivateSubnet2:
-        Type: String    
-    DBPassword:
-        NoEcho: 'true'
-        Type: String
-        Description: New account and RDS password
-        MinLength: '1'
-        MaxLength: '41'
-        ConstraintDescription: the password must be between 1 and 41 characters
 Resources:
 
     WebServerRole: 
@@ -36,6 +25,7 @@ Resources:
             ManagedPolicyArns: 
                 - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
                 - "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
+                - "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
     
     WebServerInstanceProfile: 
         Type: AWS::IAM::InstanceProfile

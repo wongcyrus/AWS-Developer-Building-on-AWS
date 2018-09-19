@@ -35,24 +35,39 @@ Resources:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/vpc.yaml' 
             TimeoutInMinutes: 5
 
-    SecurityGroupStack:  
+    SecurityStack:  
         Type: AWS::CloudFormation::Stack
         Properties:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/security.yaml' 
             TimeoutInMinutes: 5
-
+            Parameters:
+                EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+                
     DBStack:  
         Type: AWS::CloudFormation::Stack
         Properties:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
             TimeoutInMinutes: 30
             Parameters:
-                EC2VpcId: !GetAtt VPCStack.Outputs.VPC
                 PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
                 PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
-                DBSecurityGroup: !GetAtt SecurityGroupStack.Outputs.DBSecurityGroup
+                DBSecurityGroup: !GetAtt SecurityStack.Outputs.DBSecurityGroup
                 DBPassword: !Ref DBPassword
 
+    WebStack:  
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/web.yaml' 
+            TimeoutInMinutes: 10
+            Parameters:
+                EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+                PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
+                PublicSubnet2: !GetAtt VPCStack.Outputs.PublicSubnet2
+                PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
+                PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
+                WebServerInstanceProfile: !GetAtt SecurityStack.Outputs.WebServerInstanceProfile
+                WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
+ 
     EdxProjectCloud9:            
         Type: AWS::Cloud9::EnvironmentEC2
         Properties:

@@ -5,10 +5,7 @@ cp ../../Week\ 1/Exercise\ 3/vpc.yaml .
 cp ../../Week\ 2/Exercise\ 5/iam.yaml .
 aws s3api create-bucket --bucket $SourceBucket
 sleep 5
-aws s3 cp iam.yaml s3://$SourceBucket
-aws s3 cp vpc.yaml s3://$SourceBucket
-aws s3 cp db.yaml s3://$SourceBucket
-aws s3 cp security.yaml s3://$SourceBucket
+aws s3 sync . s3://$SourceBucket 
 rm vpc.yaml
 rm iam.yaml
 aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \

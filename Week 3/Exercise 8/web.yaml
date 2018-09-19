@@ -5,6 +5,10 @@ Description: Build on AWS Project Security Stack.
 Parameters:
     EC2VpcId:
         Type: String
+    PublicSubnet1:
+        Type: String    
+    PublicSubnet2:
+        Type: String    
     PrivateSubnet1:
         Type: String    
     PrivateSubnet2:
@@ -21,7 +25,7 @@ Resources:
         Type: AWS::EC2::Instance
         Properties: 
             ImageId: !Ref LatestAmiId
-            IamInstanceProfile: !WebServerInstanceProfile
+            IamInstanceProfile: !Ref WebServerInstanceProfile
             NetworkInterfaces: 
                 -   AssociatePublicIpAddress: true
                     DeviceIndex: 0
@@ -29,13 +33,70 @@ Resources:
                         - Ref: WebSecurityGroup
                     SubnetId: 
                         Ref: PrivateSubnet1
-Outputs:
-    WebServerInstanceProfile:
-        Value: !Ref WebServerInstanceProfile
-        Description: Web Server Instance Profile
-    WebSecurityGroup:
-        Value: !GetAtt WebSecurityGroup.GroupId
-        Description: WebSecurityGroup
-    DBSecurityGroup:
-        Value: !Ref DBSecurityGroup
-        Description: DBSecurityGroup
+            Tags:
+            -
+              Key: Name
+              Value: WebServer1
+
+    WebInstance2: 
+        Type: AWS::EC2::Instance
+        Properties: 
+            ImageId: !Ref LatestAmiId
+            IamInstanceProfile: !Ref WebServerInstanceProfile
+            NetworkInterfaces: 
+                -   AssociatePublicIpAddress: true
+                    DeviceIndex: 0
+                    GroupSet: 
+                        - Ref: WebSecurityGroup
+                    SubnetId: 
+                        Ref: PrivateSubnet1
+            Tags:
+            -
+              Key: Name
+              Value: WebServer2
+              
+    LoadBalancer:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties:
+            Subnets:
+                - Ref: PublicSubnet1
+                - Ref: PublicSubnet2
+            LoadBalancerAttributes:
+                - Key: idle_timeout.timeout_seconds
+            Value: '50'
+            SecurityGroups:
+                - Ref: WebSecurityGroup
+
+    DefaultTargetGroup: 
+        Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+        Properties:
+            HealthCheckIntervalSeconds: 15
+            HealthCheckPath: '/'
+            HealthCheckProtocol: HTTP
+            HealthCheckTimeoutSeconds: 10
+            HealthyThresholdCount: 2
+            UnhealthyThresholdCount: 2
+            Matcher:
+                HttpCode: '200-299'
+            Port: 80
+            Protocol: HTTP
+            VpcId: !Ref EC2VpcId
+            TargetGroupAttributes:
+                -   Key: deregistration_delay.timeout_seconds
+                    Value: 30                
+            Targets:
+            - Id:
+                Ref: WebInstance1
+              Port: 80
+            - Id:
+                Ref: WebInstance2
+              Port: 80
+    HttpListener:
+        Type: 'AWS::ElasticLoadBalancingV2::Listener'
+        Properties:
+            DefaultActions:
+            - Type: forward
+              TargetGroupArn: !Ref: DefaultTargetGroup
+            LoadBalancerArn: !Ref LoadBalancer
+            Port: 80
+            Protocol: HTTP
