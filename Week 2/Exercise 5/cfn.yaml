@@ -37,14 +37,19 @@ Resources:
             InstanceType: t2.micro
             Name: BuildingOnAWS
             SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1
-            
+
+    ImageS3Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+          BucketName: !Sub 'imagebucket${AWS::AccountId}'
+           
 Outputs:
     EdxProjectCloud9:
         Value: !Ref EdxProjectCloud9
         Description: Edx User Cloud9
     AccessKey:
         Value: !GetAtt IAMStack.Outputs.AccessKey
-        Description: AWSAccessKeyId of new user
+        Description: AWSAccessKeyId of new user.
     SecretKey:
         Value: !GetAtt IAMStack.Outputs.SecretKey
-        Description: AWSSecretKey of new user
+        Description: AWSSecretKey of new user.
