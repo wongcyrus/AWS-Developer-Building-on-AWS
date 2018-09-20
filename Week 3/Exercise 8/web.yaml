@@ -70,7 +70,7 @@ Resources:
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
-                    mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+                    mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
                     start uwsgi
                     
                     # switch on nginx and configure to autostart
@@ -126,7 +126,7 @@ Resources:
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
-                    mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+                    mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
                     start uwsgi
                     
                     # switch on nginx and configure to autostart
