@@ -23,40 +23,72 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
       
-  NAT:
+  NAT1:
     DependsOn: AttachGateway
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId:
         Fn::GetAtt:
-        - EIP
+        - EIP1
         - AllocationId
       SubnetId:
         Ref: PublicSubnet1
-      Tags:
-        - Key: foo
-          Value: bar
-  EIP:
+
+  EIP1:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  Route:
+      
+  PrivateRoute1:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
-        Ref: PrivateRouteTable
+        Ref: PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: NAT
+        Ref: NAT1
 
-  PrivateRouteTable:
+  PrivateRouteTable1:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: edx-routetable-private
-          
+          Value: edx-routetable-private1
+
+  NAT2:
+    DependsOn: AttachGateway
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - EIP2
+        - AllocationId
+      SubnetId:
+        Ref: PublicSubnet2
+
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NAT2
+
+  PrivateRouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: edx-routetable-private2
+                    
   PublicSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -132,12 +164,12 @@ Resources:
   PrivateRouteAssociation1:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable1
       SubnetId: !Ref PrivateSubnet1
   PrivateRouteAssociation2:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 Outputs:
   VPC:
