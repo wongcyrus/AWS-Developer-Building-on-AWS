@@ -10,6 +10,7 @@ unzip -o ex-rds.zip
 rm ex-rds.zip
 yes | cp -f code/app.ini exercise-rds/Deploy/
 yes | cp -f code/config.py exercise-rds/FlaskApp/
+yes | cp -f code/requirements.txt exercise-rds/FlaskApp/
 cd exercise-rds
 zip -ro deploy-app.zip Deploy/ FlaskApp/
 aws s3 cp deploy-app.zip s3://$SourceBucket/
@@ -22,9 +23,10 @@ aws s3 sync . s3://$SourceBucket
 rm vpc.yaml
 rm iam.yaml
 
-# aws cloudformation update-stack --stack-name edx-project-stack \
-# --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
-aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
+
+# aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
+aws cloudformation update-stack --stack-name edx-project-stack \
+--template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
