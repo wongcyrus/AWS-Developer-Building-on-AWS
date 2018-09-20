@@ -27,6 +27,7 @@ Resources:
         Type: AWS::EC2::Instance
         Properties: 
             ImageId: !Ref LatestAmiId
+            InstanceType: t2.micro
             IamInstanceProfile: !Ref WebServerInstanceProfile
             NetworkInterfaces: 
                 -   AssociatePublicIpAddress: true
@@ -47,7 +48,7 @@ Resources:
                     yum -y update
                     
                     # install python3.6 and dev tools
-                    amazon-linux-extras installpython3
+                    amazon-linux-extras install python3 -y
                     yum -y install python3-devel
                     
                     # install nginx
@@ -73,18 +74,14 @@ Resources:
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
                     service nginx start
-                    
-                    # Update the latest SSM agaent
-                    yum erase amazon-ssm-agent –y
-                    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-                    systemctl enable amazon-ssm-agent
-                    systemctl start amazon-ssm-agent
+
 
           
     WebInstance2: 
         Type: AWS::EC2::Instance
         Properties: 
             ImageId: !Ref LatestAmiId
+            InstanceType: t2.micro
             IamInstanceProfile: !Ref WebServerInstanceProfile
             NetworkInterfaces: 
                 -   AssociatePublicIpAddress: true
@@ -105,7 +102,7 @@ Resources:
                     yum -y update
                     
                     # install python3.6 and dev tools
-                    amazon-linux-extras installpython3
+                    amazon-linux-extras install python3 -y
                     yum -y install python3-devel
                     
                     # install nginx
@@ -131,12 +128,6 @@ Resources:
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
                     service nginx start
-                    
-                    # Update the latest SSM agaent
-                    yum erase amazon-ssm-agent –y
-                    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-                    systemctl enable amazon-ssm-agent
-                    systemctl start amazon-ssm-agent
 
 
     LoadBalancer:

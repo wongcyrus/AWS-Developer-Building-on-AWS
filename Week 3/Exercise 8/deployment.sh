@@ -21,9 +21,10 @@ cp ../../Week\ 2/Exercise\ 5/iam.yaml .
 aws s3 sync . s3://$SourceBucket 
 rm vpc.yaml
 rm iam.yaml
-# aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
-aws cloudformation update-stack --stack-name edx-project-stack \
---template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
+
+# aws cloudformation update-stack --stack-name edx-project-stack \
+# --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
+aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
