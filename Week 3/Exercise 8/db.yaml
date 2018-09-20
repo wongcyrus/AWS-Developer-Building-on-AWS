@@ -28,6 +28,7 @@ Resources:
 
     MyDB: 
         Type: AWS::RDS::DBInstance
+        DeletionPolicy: Delete
         Properties: 
             DBInstanceIdentifier: edx-photos-db
             DBName: Photos
