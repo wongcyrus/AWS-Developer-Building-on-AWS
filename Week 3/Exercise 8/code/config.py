@@ -10,9 +10,17 @@
 # specific language governing permissions and limitations under the License.
 "Central configuration"
 
+import requests
+import os
+
+r = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document")
+response_json = r.json()
+region = response_json.get('region')
+os.environ['AWS_DEFAULT_REGION'] = region
+
 def get_parameter():
     import boto3
-    client = boto3.client('ssm')
+    client = boto3.client('ssm',region_name=region)
     keys =['PHOTOS_BUCKET','FLASK_SECRET','DATABASE_HOST','DATABASE_USER','DATABASE_PASSWORD','DATABASE_DB_NAME']
     ssm_keys = list(map(lambda k: "edx-" + k, keys))
     response = client.get_parameters(

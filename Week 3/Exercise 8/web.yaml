@@ -58,8 +58,6 @@ Resources:
                     yum -y install gcc
                     pip3 install uwsgi
                     
-                    pwd 
-                    ls -la
                     # download and setup our application
                     mkdir /photos
                     cd /photos
@@ -67,18 +65,19 @@ Resources:
                     unzip deploy-app.zip
                     pip3 install -r FlaskApp/requirements.txt
                     
+                    pyhon3 Deploy/database_create_tables.py
+                    
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
                     mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
-                    uwsgi
+                    exec uwsgi --ini /photos/Deploy/app.ini
                     
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
                     service nginx start
 
 
-          
     WebInstance2: 
         Type: AWS::EC2::Instance
         Properties: 
@@ -113,9 +112,7 @@ Resources:
                     # install the uwsgi server
                     yum -y install gcc
                     pip3 install uwsgi
-                    
-                    pwd 
-                    ls -la
+
                     # download and setup our application
                     mkdir /photos
                     cd /photos
@@ -123,11 +120,13 @@ Resources:
                     unzip deploy-app.zip
                     pip3 install -r FlaskApp/requirements.txt
                     
+                    pyhon3 Deploy/database_create_tables.py
+                    
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
                     mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
-                    uwsgi
+                    exec uwsgi --ini /photos/Deploy/app.ini
                     
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
