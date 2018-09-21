@@ -20,8 +20,8 @@ Parameters:
     WebSecurityGroup:
         Type: String
     LatestAmiId:
-        Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-        Default: '/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2'
+        Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+        Default: /aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2
 Resources:
     WebInstance1: 
         Type: AWS::EC2::Instance
@@ -30,8 +30,7 @@ Resources:
             InstanceType: t2.micro
             IamInstanceProfile: !Ref WebServerInstanceProfile
             NetworkInterfaces: 
-                -   AssociatePublicIpAddress: true
-                    DeviceIndex: 0
+                -   DeviceIndex: 0
                     GroupSet: 
                         - Ref: WebSecurityGroup
                     SubnetId: 
@@ -63,7 +62,7 @@ Resources:
                     cd /photos
                     aws s3 cp s3://$bucket/deploy-app.zip .
                     unzip deploy-app.zip
-                    pip-3.6 install -r FlaskApp/requirements.
+                    pip-3.6 install -r FlaskApp/requirements.txt
                     
                     python3 Deploy/database_create_tables.py
                     
@@ -85,8 +84,7 @@ Resources:
             InstanceType: t2.micro
             IamInstanceProfile: !Ref WebServerInstanceProfile
             NetworkInterfaces: 
-                -   AssociatePublicIpAddress: true
-                    DeviceIndex: 0
+                -   DeviceIndex: 0
                     GroupSet: 
                         - Ref: WebSecurityGroup
                     SubnetId: 
@@ -118,7 +116,7 @@ Resources:
                     cd /photos
                     aws s3 cp s3://$bucket/deploy-app.zip .
                     unzip deploy-app.zip
-                    pip-3.6 install -r FlaskApp/requirements.
+                    pip-3.6 install -r FlaskApp/requirements.txt
                     
                     python3 Deploy/database_create_tables.py
                     
@@ -146,7 +144,7 @@ Resources:
                 - Ref: WebSecurityGroup
 
     DefaultTargetGroup: 
-        Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
         Properties:
             HealthCheckIntervalSeconds: 15
             HealthCheckPath: '/'
@@ -171,7 +169,7 @@ Resources:
                 Ref: WebInstance2
               Port: 80
     HttpListener:
-        Type: 'AWS::ElasticLoadBalancingV2::Listener'
+        Type: AWS::ElasticLoadBalancingV2::Listener
         Properties:
             DefaultActions:
             - Type: forward
