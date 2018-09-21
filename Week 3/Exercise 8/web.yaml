@@ -21,7 +21,7 @@ Parameters:
         Type: String
     LatestAmiId:
         Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-        Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+        Default: '/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2'
 Resources:
     WebInstance1: 
         Type: AWS::EC2::Instance
@@ -48,35 +48,35 @@ Resources:
                     yum -y update
                     
                     # install python3.6 and dev tools
-                    amazon-linux-extras install python3 -y
-                    yum -y install python3-devel
+                    yum -y install python36
+                    yum -y install python36-devel
                     
                     # install nginx
-                    amazon-linux-extras install nginx1.12 -y
+                    yum -y install nginx
                     
                     # install the uwsgi server
                     yum -y install gcc
-                    pip3 install uwsgi
+                    pip-3.6 install uwsgi
                     
                     # download and setup our application
                     mkdir /photos
                     cd /photos
                     aws s3 cp s3://$bucket/deploy-app.zip .
                     unzip deploy-app.zip
-                    pip3 install -r FlaskApp/requirements.txt
+                    pip-3.6 install -r FlaskApp/requirements.
                     
                     python3 Deploy/database_create_tables.py
                     
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
-                    mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
-                    exec /usr/local/bin/uwsgi --ini /photos/Deploy/app.ini
+                    mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+                    start uwsgi
                     
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
                     service nginx start
-
+                
 
     WebInstance2: 
         Type: AWS::EC2::Instance
@@ -103,35 +103,34 @@ Resources:
                     yum -y update
                     
                     # install python3.6 and dev tools
-                    amazon-linux-extras install python3 -y
-                    yum -y install python3-devel
+                    yum -y install python36
+                    yum -y install python36-devel
                     
                     # install nginx
-                    amazon-linux-extras install nginx1.12 -y
+                    yum -y install nginx
                     
                     # install the uwsgi server
                     yum -y install gcc
-                    pip3 install uwsgi
-
+                    pip-3.6 install uwsgi
+                    
                     # download and setup our application
                     mkdir /photos
                     cd /photos
                     aws s3 cp s3://$bucket/deploy-app.zip .
                     unzip deploy-app.zip
-                    pip3 install -r FlaskApp/requirements.txt
+                    pip-3.6 install -r FlaskApp/requirements.
                     
                     python3 Deploy/database_create_tables.py
                     
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
-                    mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
-                    exec /usr/local/bin/uwsgi --ini /photos/Deploy/app.ini
+                    mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+                    start uwsgi
                     
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
                     service nginx start
-
 
     LoadBalancer:
         Type: AWS::ElasticLoadBalancingV2::LoadBalancer
