@@ -9,6 +9,7 @@ wget https://s3-us-west-2.amazonaws.com/us-west-2-tcdev/courses/AWS-100-ADG/v1.1
 unzip -o ex-rds.zip
 rm ex-rds.zip
 yes | cp -f code/app.ini exercise-rds/Deploy/
+yes | cp -f code/nginx.conf exercise-rds/Deploy/
 yes | cp -f code/config.py exercise-rds/FlaskApp/
 yes | cp -f code/requirements.txt exercise-rds/FlaskApp/
 yes | cp -f code/database_create_tables.py exercise-rds/Deploy/

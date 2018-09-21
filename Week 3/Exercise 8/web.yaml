@@ -65,13 +65,13 @@ Resources:
                     unzip deploy-app.zip
                     pip3 install -r FlaskApp/requirements.txt
                     
-                    pyhon3 Deploy/database_create_tables.py
+                    python3 Deploy/database_create_tables.py
                     
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
                     mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
-                    exec uwsgi --ini /photos/Deploy/app.ini
+                    exec /usr/local/bin/uwsgi --ini /photos/Deploy/app.ini
                     
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
@@ -120,13 +120,13 @@ Resources:
                     unzip deploy-app.zip
                     pip3 install -r FlaskApp/requirements.txt
                     
-                    pyhon3 Deploy/database_create_tables.py
+                    python3 Deploy/database_create_tables.py
                     
                     # copy in the nginx config
                     mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                     # configure upstart to run uwsgi
                     mv -f Deploy/uwsgi.conf /etc/init.d/uwsgi.conf
-                    exec uwsgi --ini /photos/Deploy/app.ini
+                    exec /usr/local/bin/uwsgi --ini /photos/Deploy/app.ini
                     
                     # switch on nginx and configure to autostart
                     chkconfig nginx on
