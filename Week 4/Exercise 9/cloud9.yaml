@@ -32,11 +32,6 @@ Resources:
                 console.log(err, err.stack); // an error occurred
                 response.send(event, context, response.FAILED, responseData);
                 }else{
-                    console.log(data.Reservations[0]);
-                    console.log(data.Reservations[0].Instances);
-                    console.log(data.Reservations[0].Instances[0].SecurityGroups);
-                    console.log(data.Reservations[0].Instances[0].SecurityGroups[0]);
-                    console.log(data.Reservations[0].Instances[0].SecurityGroups[0].GroupId);
                     let responseData = {Value: data.Reservations[0].Instances[0].SecurityGroups[0].GroupId};        
                     console.log(responseData);
                     response.send(event, context, response.SUCCESS, responseData);
@@ -86,5 +81,6 @@ Outputs:
     EdxProjectCloud9:
         Value: !Ref EdxProjectCloud9
         Description: Edx User Cloud9
-    EdxProjectCloud9SG:    
+    EdxProjectCloud9Sg:    
         Value: !GetAtt CustomResource.Value
+        Description: Edx User Cloud9 Security Group ID
