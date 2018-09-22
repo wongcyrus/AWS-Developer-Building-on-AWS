@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  EdxProjectCloud9:
+    Type: 'AWS::Cloud9::EnvironmentEC2'
+    Properties:
+      AutomaticStopTimeMinutes: 30
+      InstanceType: t2.micro
+      Name: !Sub "BuildingOnAWS${AWS::StackName}"
+      SubnetId: subnet-059ec5eed7655ec82
+
+  CustomFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: !Sub |
+          const response = require('cfn-response');
+          const AWS = require('aws-sdk');
+          exports.handler = (event, context) => {
+            let params = {
+              Filters: [
+                 {
+                Name: "tag:aws:cloud9:environment", 
+                Values: [
+                   event.ResourceProperties.EdxProjectCloud9
+                ]
+               }
+              ]
+             };
+             let ec2 = new AWS.EC2();
+             ec2.describeInstances(params, (err, data) => {
+                if (err) {
+                console.log(err, err.stack); // an error occurred
+                response.send(event, context, response.FAILED, responseData);
+                }else{
+                    console.log(data.Reservations[0]);
+                    console.log(data.Reservations[0].Instances);
+                    console.log(data.Reservations[0].Instances[0].SecurityGroups);
+                    console.log(data.Reservations[0].Instances[0].SecurityGroups[0]);
+                    console.log(data.Reservations[0].Instances[0].SecurityGroups[0].GroupId);
+                    let responseData = {Value: data.Reservations[0].Instances[0].SecurityGroups[0].GroupId};        
+                    console.log(responseData);
+                    response.send(event, context, response.SUCCESS, responseData);
+                }
+                    
+             });
+          };
+      Runtime: nodejs8.10
+      Handler: index.handler
+      Role: !GetAtt 'LambdaExecutionRole.Arn'
+      Timeout: '30'
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - ec2:Describe*
+                Resource: '*'
+  CustomResource:
+    Type: Custom::CustomResource
+    Properties:
+      ServiceToken: !GetAtt 'CustomFunction.Arn'
+      EdxProjectCloud9: !Ref EdxProjectCloud9
+        
+Outputs:
+    EdxProjectCloud9:
+        Value: !Ref EdxProjectCloud9
+        Description: Edx User Cloud9
+    EdxProjectCloud9SG:    
+        Value: !GetAtt CustomResource.Value
