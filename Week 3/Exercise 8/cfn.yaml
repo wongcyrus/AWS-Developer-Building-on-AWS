@@ -56,7 +56,7 @@ Resources:
 
     WebStack:  
         Type: AWS::CloudFormation::Stack
-        DependsOn: DBStack
+        DependsOn: ParametesStack
         Properties:
             TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/web.yaml' 
             TimeoutInMinutes: 10
