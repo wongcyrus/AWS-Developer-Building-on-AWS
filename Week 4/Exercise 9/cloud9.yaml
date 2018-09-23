@@ -84,6 +84,6 @@ Outputs:
     EdxProjectCloud9:
         Value: !Ref EdxProjectCloud9
         Description: Edx User Cloud9
-    EdxProjectCloud9Sg:    
+    EdxProjectCloud9Sg:
         Value: !GetAtt CustomResource.Value
         Description: Edx User Cloud9 Security Group ID

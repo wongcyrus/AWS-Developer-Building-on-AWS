@@ -42,7 +42,7 @@ Resources:
       TimeoutInMinutes: 5
       Parameters:
         EC2VpcId: !GetAtt VPCStack.Outputs.VPC
-        Cloud9Stack: !GetAtt Cloud9Stack.Outputs.EdxProjectCloud9Sg
+        EdxProjectCloud9Sg: !GetAtt Cloud9Stack.Outputs.EdxProjectCloud9Sg
         
   DBStack:  
     Type: AWS::CloudFormation::Stack

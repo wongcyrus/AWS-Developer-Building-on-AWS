@@ -30,15 +30,16 @@ Resources:
       InstanceType: t2.micro
       IamInstanceProfile: !Ref WebServerInstanceProfile
       NetworkInterfaces: 
-        -   DeviceIndex: 0
+        -   
+          DeviceIndex: 0
           GroupSet: 
             - Ref: WebSecurityGroup
           SubnetId: 
             Ref: PrivateSubnet1
       Tags:
-      -
-        Key: Name
-        Value: WebServer1
+        -
+          Key: Name
+          Value: WebServer1
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -ex
@@ -84,15 +85,16 @@ Resources:
       InstanceType: t2.micro
       IamInstanceProfile: !Ref WebServerInstanceProfile
       NetworkInterfaces: 
-        -   DeviceIndex: 0
+        - 
+          DeviceIndex: 0
           GroupSet: 
             - Ref: WebSecurityGroup
           SubnetId: 
             Ref: PrivateSubnet2
       Tags:
-      -
-        Key: Name
-        Value: WebServer2
+        -
+          Key: Name
+          Value: WebServer2
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -ex
@@ -162,12 +164,12 @@ Resources:
           Key: deregistration_delay.timeout_seconds
           Value: 30        
       Targets:
-      - Id:
-        Ref: WebInstance1
-        Port: 80
-      - Id:
-        Ref: WebInstance2
-        Port: 80
+        - Id:
+            Ref: WebInstance1
+            Port: 80
+        - Id:
+            Ref: WebInstance2
+            Port: 80
   HttpListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
