@@ -1,8 +1,4 @@
 Description: Building on AWS VPC Stack
-Mappings:
-  AWSRegionToAMI:
-    us-west-2:
-      AMI: ami-04681a1dbd79675a5
 Resources:
   VPC:
     Type: 'AWS::EC2::VPC'

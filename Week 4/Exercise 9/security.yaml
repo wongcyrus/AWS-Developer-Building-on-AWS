@@ -3,10 +3,11 @@ Metadata:
     License: Apache-2.0
 Description: Build on AWS Project Security Stack.
 Parameters:
-    EC2VpcId:
-        Type: String
+  EC2VpcId:
+    Type: String
+  EdxProjectCloud9Sg:
+    Type: String
 Resources:
-
     WebServerRole: 
         Type: AWS::IAM::Role
         Properties:
@@ -28,18 +29,18 @@ Resources:
                 - "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
             Policies: 
                 - 
-                  PolicyName: "ssm"
-                  PolicyDocument: 
-                    Version: "2012-10-17"
-                    Statement: 
-                    - 
-                        Effect: "Allow"
-                        Action: ssm:DescribeParameters
-                        Resource: "*"
-                    - 
-                        Effect: "Allow"
-                        Action: ssm:GetParameters
-                        Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/edx-*"  
+                    PolicyName: "ssm"
+                    PolicyDocument: 
+                        Version: "2012-10-17"
+                        Statement: 
+                        - 
+                            Effect: "Allow"
+                            Action: ssm:DescribeParameters
+                            Resource: "*"
+                        - 
+                            Effect: "Allow"
+                            Action: ssm:GetParameters
+                            Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/edx-*"  
 
     WebServerInstanceProfile: 
         Type: AWS::IAM::InstanceProfile
@@ -75,6 +76,8 @@ Resources:
             DBSecurityGroupIngress:
                 -
                     EC2SecurityGroupId: !Ref WebSecurityGroup
+                -
+                    EC2SecurityGroupId: !Ref EdxProjectCloud9Sg
             GroupDescription: Frontend Access
 
 Outputs:

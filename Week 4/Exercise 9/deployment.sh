@@ -20,14 +20,12 @@ cp ../../Week\ 1/Exercise\ 3/vpc.yaml .
 cp ../../Week\ 2/Exercise\ 5/iam.yaml .
 cp ../../Week\ 3/Exercise\ 8/db.yaml .
 cp ../../Week\ 3/Exercise\ 8/parameters.yaml .
-cp ../../Week\ 3/Exercise\ 8/security.yaml .
 cp ../../Week\ 3/Exercise\ 8/web.yaml .
 aws s3 sync . s3://$SourceBucket 
 rm vpc.yaml
 rm iam.yaml
 rm db.yaml
 rm parameters.yaml
-rm security.yaml
 rm web.yaml
 
 # aws cloudformation update-stack --stack-name edx-project-stack \
@@ -37,9 +35,6 @@ aws cloudformation create-stack --stack-name edx-project-stack --template-body f
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
                 ParameterKey=SourceBucket,ParameterValue=$SourceBucket
-
-aws cloudformation create-stack --stack-name x --template-body file://cloud9.yaml \
---capabilities CAPABILITY_NAMED_IAM
 
 aws cloudformation wait stack-create-complete --stack-name edx-project-stack
 AWS_ACCESS_KEY_ID=$(aws cloudformation describe-stacks --stack-name edx-project-stack \

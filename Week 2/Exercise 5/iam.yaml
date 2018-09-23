@@ -1,82 +1,82 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata: 
-    License: Apache-2.0
+  License: Apache-2.0
 Description: 'Build on AWS Project IAM User Stack.'
 Parameters:
-    Password:
-        NoEcho: 'true'
-        Type: String
-        Description: New account password
-        MinLength: '1'
-        MaxLength: '41'
-        ConstraintDescription: the password must be between 1 and 41 characters
+  Password:
+    NoEcho: 'true'
+    Type: String
+    Description: New account password
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters
 Resources:
-    CFNUser:
-        Type: AWS::IAM::User
-        Properties:
-            UserName: edXProjectUser
-            LoginProfile:
-                Password: !Ref 'Password'
-    CFNUserGroup:
-        Type: AWS::IAM::Group
-        Properties:
-            ManagedPolicyArns:
-                - arn:aws:iam::aws:policy/AWSCloud9User
-    Users:
-        Type: AWS::IAM::UserToGroupAddition
-        Properties:
-            GroupName: !Ref 'CFNUserGroup'
-            Users: [!Ref 'CFNUser']
-    CFNUserPolicies:
-        Type: AWS::IAM::Policy
-        Properties:
-            PolicyName: edXProjectPolicy
-            PolicyDocument:
-                Statement:
-                - Sid: Sid1
-                  Effect: Allow
-                  Action:
-                  - iam:*
-                  - rds:*
-                  - sns:*
-                  - cloudformation:*
-                  - rekognition:*
-                  - ec2:*
-                  - cognito-idp:*
-                  - sqs:*
-                  - xray:*
-                  - s3:*
-                  - elasticloadbalancing:*
-                  - cloud9:*
-                  - lambda:*
-                  - tag:GetResources
-                  - logs:*
-                  - kms:ListKeyPolicies
-                  - kms:GenerateRandom
-                  - kms:ListRetirableGrants
-                  - kms:GetKeyPolicy
-                  - kms:ListResourceTags
-                  - kms:ReEncryptFrom
-                  - kms:ListGrants
-                  - kms:GetParametersForImport
-                  - kms:ListKeys
-                  - kms:GetKeyRotationStatus
-                  - kms:ListAliases
-                  - kms:ReEncryptTo
-                  - kms:DescribeKey
-                  Resource: "*"
-            Groups: [!Ref 'CFNUserGroup']
-    CFNKeys:
-        Type: AWS::IAM::AccessKey
-        Properties:
-            UserName: !Ref 'CFNUser'
+  CFNUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: edXProjectUser
+      LoginProfile:
+        Password: !Ref 'Password'
+  CFNUserGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCloud9User
+  Users:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref 'CFNUserGroup'
+      Users: [!Ref 'CFNUser']
+  CFNUserPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: edXProjectPolicy
+      PolicyDocument:
+        Statement:
+        - Sid: Sid1
+          Effect: Allow
+          Action:
+          - iam:*
+          - rds:*
+          - sns:*
+          - cloudformation:*
+          - rekognition:*
+          - ec2:*
+          - cognito-idp:*
+          - sqs:*
+          - xray:*
+          - s3:*
+          - elasticloadbalancing:*
+          - cloud9:*
+          - lambda:*
+          - tag:GetResources
+          - logs:*
+          - kms:ListKeyPolicies
+          - kms:GenerateRandom
+          - kms:ListRetirableGrants
+          - kms:GetKeyPolicy
+          - kms:ListResourceTags
+          - kms:ReEncryptFrom
+          - kms:ListGrants
+          - kms:GetParametersForImport
+          - kms:ListKeys
+          - kms:GetKeyRotationStatus
+          - kms:ListAliases
+          - kms:ReEncryptTo
+          - kms:DescribeKey
+          Resource: "*"
+      Groups: [!Ref 'CFNUserGroup']
+  CFNKeys:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref 'CFNUser'
 
 Outputs:
-    EdXProjectUser:
-        Value: !GetAtt CFNUser.Arn
-    AccessKey:
-        Value: !Ref 'CFNKeys'
-        Description: AWSAccessKeyId of new user
-    SecretKey:
-        Value: !GetAtt [CFNKeys, SecretAccessKey]
-        Description: AWSSecretKey of new user
+  EdXProjectUser:
+    Value: !GetAtt CFNUser.Arn
+  AccessKey:
+    Value: !Ref 'CFNKeys'
+    Description: AWSAccessKeyId of new user
+  SecretKey:
+    Value: !GetAtt [CFNKeys, SecretAccessKey]
+    Description: AWSSecretKey of new user

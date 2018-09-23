@@ -1,4 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  PublicSubnet1:
+    Type: String
 Resources:
   EdxProjectCloud9:
     Type: 'AWS::Cloud9::EnvironmentEC2'
@@ -6,7 +9,7 @@ Resources:
       AutomaticStopTimeMinutes: 30
       InstanceType: t2.micro
       Name: !Sub "BuildingOnAWS${AWS::StackName}"
-      SubnetId: subnet-059ec5eed7655ec82
+      SubnetId: !Ref PublicSubnet1
 
   CustomFunction:
     Type: AWS::Lambda::Function

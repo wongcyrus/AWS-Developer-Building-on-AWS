@@ -1,60 +1,60 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata: 
-    License: Apache-2.0
+  License: Apache-2.0
 Description: Build on AWS Project Parameter Stack.
 Parameters:
-    MyDBEndpoint:
-        Type: String
-    ImageS3Bucket:
-        Type: String
-    DBPassword:
-        NoEcho: 'true'
-        Type: String
-        Description: RDS Password.
-        MinLength: '1'
-        MaxLength: '41'
-        ConstraintDescription: the password must be between 1 and 41 characters.
+  MyDBEndpoint:
+    Type: String
+  ImageS3Bucket:
+    Type: String
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: RDS Password.
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters.
 Resources:
-    DBHostParameter:
-        Type: AWS::SSM::Parameter
-        Properties:
-            Name: edx-DATABASE_HOST
-            Type: String
-            Value: !Ref MyDBEndpoint
+  DBHostParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_HOST
+      Type: String
+      Value: !Ref MyDBEndpoint
 
-    DBUserParameter:
-        Type: AWS::SSM::Parameter
-        Properties:
-            Name: edx-DATABASE_USER
-            Type: String
-            Value: web_user
-      
-    DBPasswordParameter:
-        Type: AWS::SSM::Parameter
-        Properties:
-            Name: edx-DATABASE_PASSWORD
-            Type: String
-            Value: !Ref DBPassword
+  DBUserParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_USER
+      Type: String
+      Value: web_user
+    
+  DBPasswordParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_PASSWORD
+      Type: String
+      Value: !Ref DBPassword
 
-    DBNameParameter:
-        Type: AWS::SSM::Parameter
-        Properties:
-            Name: edx-DATABASE_DB_NAME
-            Type: String
-            Value: Photos
+  DBNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_DB_NAME
+      Type: String
+      Value: Photos
+    
+  FlaskSecretParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-FLASK_SECRET
+      Type: String
+      Value: secret
+    
+  PhotosBuckeTParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-PHOTOS_BUCKET
+      Type: String
+      Value: !Ref ImageS3Bucket
       
-    FlaskSecretParameter:
-        Type: AWS::SSM::Parameter
-        Properties:
-            Name: edx-FLASK_SECRET
-            Type: String
-            Value: secret
-      
-    PhotosBuckeTParameter:
-        Type: AWS::SSM::Parameter
-        Properties:
-            Name: edx-PHOTOS_BUCKET
-            Type: String
-            Value: !Ref ImageS3Bucket
-            
 
