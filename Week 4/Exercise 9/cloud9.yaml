@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Description: Build on AWS Project Cloud9 Stack.
 Parameters:
   PublicSubnet1:
     Type: String

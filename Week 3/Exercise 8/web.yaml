@@ -164,12 +164,11 @@ Resources:
           Key: deregistration_delay.timeout_seconds
           Value: 30        
       Targets:
-        - Id:
-            Ref: WebInstance1
-            Port: 80
-        - Id:
-            Ref: WebInstance2
-            Port: 80
+        - Id: !Ref WebInstance1
+          Port: 80
+        - Id: !Ref WebInstance2
+          Port: 80
+            
   HttpListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
