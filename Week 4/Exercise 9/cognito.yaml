@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Build on AWS Project Cloud9 Stack.
+Resources:
+  SNSRole:
+    Type: AWS::IAM::Role
+    Description: "An IAM Role to allow Cognito to send SNS messages"
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-cognito-sns-role
+      ManagedPolicyArns:
+        - Ref: CognitoSNSPolicy
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - cognito-idp.amazonaws.com
+    DependsOn:
+      - CognitoSNSPolicy
+
+  CognitoSNSPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Managed policy to allow Amazon Cognito to access SNS
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sns:publish
+            Resource: "*"
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: photos-pool
+      AliasAttributes: 
+        - email
+        - phone_number
+      AutoVerifiedAttributes:
+        - email
+      EmailVerificationMessage: Dear {name}, Your verification code is {####}
+      EmailVerificationSubject: Email verification
+      MfaConfiguration: OPTIONAL
+      Policies: 
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      Schema: 
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+        - Name: phone_number
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+      SmsConfiguration:
+        ExternalId: !Sub ${AWS::StackName}-external
+        SnsCallerArn: !GetAtt SNSRole.Arn
+        
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: WebsiteClient
+      GenerateSecret: true
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoIdPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Ref AWS::StackName
+      CognitoIdentityProviders: 
+        -
+          ClientId: !Ref CognitoUserPoolClient
+          ProviderName: !GetAtt CognitoUserPool.ProviderName
+      AllowUnauthenticatedIdentities: false
+      
+Outputs:
+  CognitoUserPoolId:
+    Description: The Pool ID of the Cognito User Pool
+    Value: !Ref CognitoUserPool
+  CognitoUserPoolProviderURL:
+    Description: The Pool ID of the Cognito User Pool
+    Value: !GetAtt CognitoUserPool.ProviderURL
+  CognitoUserPoolArn:
+    Description: The Pool ID of the Cognito User Pool
+    Value: !GetAtt CognitoUserPool.Arn   
+  CognitoUserPoolClientId:
+    Description: The Client ID 
+    Value: !Ref CognitoUserPoolClient

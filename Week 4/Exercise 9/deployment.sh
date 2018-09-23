@@ -5,12 +5,12 @@ SourceBucket=sourcebucket$AWSAccountId
 aws s3api create-bucket --bucket $SourceBucket
 sleep 5
 
-wget https://s3-us-west-2.amazonaws.com/us-west-2-tcdev/courses/AWS-100-ADG/v1.1.0/exercises/ex-rds.zip
-unzip -o ex-rds.zip
+wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercises/ex-cognito.zip
+unzip -o ex-cognito.zip
 rm ex-rds.zip
-yes | cp -f code/config.py exercise-rds/FlaskApp/
-yes | cp -f code/database_create_tables.py exercise-rds/Deploy/
-cd exercise-rds
+yes | cp -f code/config.py exercise-cognito/FlaskApp/
+yes | cp -f code/database_create_tables.py exercise-cognito/Deploy/
+cd exercise-cognito
 zip -ro deploy-app.zip Deploy/ FlaskApp/
 aws s3 cp deploy-app.zip s3://$SourceBucket/
 cd ..
