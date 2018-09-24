@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Build on AWS Project Cloud9 Stack.
+Description: 'Build on AWS Project Cognito Stack.
+  Modified https://github.com/rosberglinhares/CloudFormationCognitoCustomResources'
 Resources:
   SNSRole:
     Type: AWS::IAM::Role
@@ -34,7 +35,7 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: photos-pool
+      UserPoolName: !Sub ${AWS::StackName}-photos-pool
       AliasAttributes: 
         - email
         - phone_number
@@ -70,20 +71,149 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: WebsiteClient
+      ClientName: !Sub ${AWS::StackName}-WebsiteClient
       GenerateSecret: true
       UserPoolId: !Ref CognitoUserPool
 
+  CognitoUserPoolClientClientSettings:
+    Type: 'Custom::CognitoUserPoolClientSettings'
+    Properties:
+      ServiceToken: !GetAtt CloudFormationCognitoUserPoolClientSettings.Arn
+      UserPoolId: !Ref CognitoUserPool
+      UserPoolClientId: !Ref CognitoUserPoolClient
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURL: 'https://www.amazon.com'
+      LogoutURL: 'https://www.google.com'
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - openid
+        
   CognitoIdPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
-      IdentityPoolName: !Ref AWS::StackName
+      IdentityPoolName: !Sub ${AWS::StackName}cognitoidpool
       CognitoIdentityProviders: 
         -
           ClientId: !Ref CognitoUserPoolClient
           ProviderName: !GetAtt CognitoUserPool.ProviderName
       AllowUnauthenticatedIdentities: false
-      
+
+
+  CognitoCustomResourceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-cognito_resource_role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service: lambda.amazonaws.com
+      Policies:
+        -
+          PolicyName: WriteCloudWatchLogs
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement: 
+              -
+                Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+        -
+          PolicyName: UpdateUserPoolClient
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement: 
+              -
+                Effect: Allow
+                Action: 'cognito-idp:UpdateUserPoolClient'
+                Resource: 'arn:aws:cognito-idp:*:*:userpool/*'
+        -
+          PolicyName: ManageUserPoolDomain
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement: 
+              -
+                Effect: Allow
+                Action: 'cognito-idp:CreateUserPoolDomain'
+                Resource: 'arn:aws:cognito-idp:*:*:userpool/*'
+              -
+                Effect: Allow
+                Action: 'cognito-idp:DeleteUserPoolDomain'
+                Resource: 'arn:aws:cognito-idp:*:*:userpool/*'
+              -
+                Effect: Allow
+                Action: 'cognito-idp:DescribeUserPoolDomain'
+                Resource: '*'
+        -
+          PolicyName: InvokeLambdaFunction
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement: 
+              -
+                Effect: Allow
+                Action: 'lambda:InvokeFunction'
+                Resource: 'arn:aws:lambda:*:*:function:*'
+
+  CloudFormationCognitoUserPoolClientSettings:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-CloudFormationCognitoUserPoolClientSettings
+      Runtime: nodejs8.10
+      Code:
+        ZipFile: >
+          const AWS = require('aws-sdk');
+          const response = require('cfn-response');
+          
+          exports.handler = async (event, context) => {
+              try {
+                  switch (event.RequestType) {
+                      case 'Create':
+                      case 'Update':
+                          var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
+                          
+                          await cognitoIdentityServiceProvider.updateUserPoolClient({
+                              UserPoolId: event.ResourceProperties.UserPoolId,
+                              ClientId: event.ResourceProperties.UserPoolClientId,
+                              SupportedIdentityProviders: event.ResourceProperties.SupportedIdentityProviders,
+                              CallbackURLs: [event.ResourceProperties.CallbackURL],
+                              LogoutURLs: [event.ResourceProperties.LogoutURL],
+                              AllowedOAuthFlowsUserPoolClient: (event.ResourceProperties.AllowedOAuthFlowsUserPoolClient == 'true'),
+                              AllowedOAuthFlows: event.ResourceProperties.AllowedOAuthFlows,
+                              AllowedOAuthScopes: event.ResourceProperties.AllowedOAuthScopes
+                          }).promise();
+                          
+                          await sendCloudFormationResponse(event, context, 'SUCCESS');
+                          break;
+                          
+                      case 'Delete':
+                          await sendCloudFormationResponse(event, context, 'SUCCESS');
+                          break;
+                  }
+                  
+                  console.info(`CognitoUserPoolClientSettings Success for request type ${event.RequestType}`);
+              } catch (error) {
+                  console.error(`CognitoUserPoolClientSettings Error for request type ${event.RequestType}:`, error);
+                  await sendCloudFormationResponse(event, 'FAILED');
+              }
+          }
+          
+          async function sendCloudFormationResponse(event, context, responseStatus, responseData) {
+              await response.send(event, context, responseStatus, responseData);
+          }
+      Handler: index.handler
+      Role: !GetAtt CognitoCustomResourceRole.Arn
+
+
+
 Outputs:
   CognitoUserPoolId:
     Description: The Pool ID of the Cognito User Pool

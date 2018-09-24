@@ -16,7 +16,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        ZipFile: !Sub |
+        ZipFile: >
           const response = require('cfn-response');
           const AWS = require('aws-sdk');
           exports.handler = (event, context) => {
