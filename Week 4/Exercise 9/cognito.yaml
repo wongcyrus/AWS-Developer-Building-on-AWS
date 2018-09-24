@@ -76,7 +76,7 @@ Resources:
       UserPoolId: !Ref CognitoUserPool
 
   CognitoUserPoolClientClientSettings:
-    Type: 'Custom::CognitoUserPoolClientSettings'
+    Type: Custom::CognitoUserPoolClientSettings
     Properties:
       ServiceToken: !GetAtt CloudFormationCognitoUserPoolClientSettings.Arn
       UserPoolId: !Ref CognitoUserPool
@@ -153,6 +153,10 @@ Resources:
                 Effect: Allow
                 Action: 'cognito-idp:DescribeUserPoolDomain'
                 Resource: '*'
+              -
+                Effect: Allow
+                Action: 'cognito-idp:DescribeUserPoolClient'
+                Resource: '*'
         -
           PolicyName: InvokeLambdaFunction
           PolicyDocument: 
@@ -172,13 +176,12 @@ Resources:
         ZipFile: >
           const AWS = require('aws-sdk');
           const response = require('cfn-response');
-          
+          const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
           exports.handler = (event, context) => {
               try {
                   switch (event.RequestType) {
                       case 'Create':
                       case 'Update':
-                          let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
                           cognitoIdentityServiceProvider.updateUserPoolClient({
                               UserPoolId: event.ResourceProperties.UserPoolId,
                               ClientId: event.ResourceProperties.UserPoolClientId,
@@ -191,9 +194,20 @@ Resources:
                           })
                           .promise()
                           .then(data=>{
-                            response.send(event, context, response.SUCCESS,{});
+                              let params = {
+                                ClientId: event.ResourceProperties.UserPoolClientId,
+                                UserPoolId:  event.ResourceProperties.UserPoolId
+                              };
+                              return cognitoIdentityServiceProvider.describeUserPoolClient(params).promise();
+                          })
+                          .then(data=>{
+                            console.log(data);
+                            let responseData = {ClientSecret: data.UserPoolClient.ClientSecret};        
+                            console.log(responseData);
+                            response.send(event, context, response.SUCCESS, responseData);
                           })
                           .catch(err=>{
+                            console.error(err);
                             response.send(event, context, response.FAILED,{});
                           });
                           
@@ -205,11 +219,9 @@ Resources:
                   }
                   
                   console.info(`CognitoUserPoolClientSettings Success for request type ${event.RequestType}`);
-                  return "OK";
               } catch (error) {
                   console.error(`CognitoUserPoolClientSettings Error for request type ${event.RequestType}:`, error);
                   response.send(event, context, response.FAILED,{});
-                  return "Error";
               }
           }
       Handler: index.handler
@@ -229,3 +241,6 @@ Outputs:
   CognitoUserPoolClientId:
     Description: The Client ID 
     Value: !Ref CognitoUserPoolClient
+  ClientSecret:
+    Description: The Client ID 
+    Value: !GetAtt CognitoUserPoolClientClientSettings.ClientSecret
