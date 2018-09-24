@@ -173,14 +173,13 @@ Resources:
           const AWS = require('aws-sdk');
           const response = require('cfn-response');
           
-          exports.handler = async (event, context) => {
+          exports.handler = (event, context) => {
               try {
                   switch (event.RequestType) {
                       case 'Create':
                       case 'Update':
-                          var cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
-                          
-                          await cognitoIdentityServiceProvider.updateUserPoolClient({
+                          let cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
+                          cognitoIdentityServiceProvider.updateUserPoolClient({
                               UserPoolId: event.ResourceProperties.UserPoolId,
                               ClientId: event.ResourceProperties.UserPoolClientId,
                               SupportedIdentityProviders: event.ResourceProperties.SupportedIdentityProviders,
@@ -189,29 +188,32 @@ Resources:
                               AllowedOAuthFlowsUserPoolClient: (event.ResourceProperties.AllowedOAuthFlowsUserPoolClient == 'true'),
                               AllowedOAuthFlows: event.ResourceProperties.AllowedOAuthFlows,
                               AllowedOAuthScopes: event.ResourceProperties.AllowedOAuthScopes
-                          }).promise();
+                          })
+                          .promise()
+                          .then(data=>{
+                            response.send(event, context, response.SUCCESS,{});
+                          })
+                          .catch(err=>{
+                            response.send(event, context, response.FAILED,{});
+                          });
                           
-                          await sendCloudFormationResponse(event, context, 'SUCCESS');
                           break;
                           
                       case 'Delete':
-                          await sendCloudFormationResponse(event, context, 'SUCCESS');
+                          response.send(event, context, response.SUCCESS,{});
                           break;
                   }
                   
                   console.info(`CognitoUserPoolClientSettings Success for request type ${event.RequestType}`);
+                  return "OK";
               } catch (error) {
                   console.error(`CognitoUserPoolClientSettings Error for request type ${event.RequestType}:`, error);
-                  await sendCloudFormationResponse(event, 'FAILED');
+                  response.send(event, context, response.FAILED,{});
+                  return "Error";
               }
-          }
-          
-          async function sendCloudFormationResponse(event, context, responseStatus, responseData) {
-              await response.send(event, context, responseStatus, responseData);
           }
       Handler: index.handler
       Role: !GetAtt CognitoCustomResourceRole.Arn
-
 
 
 Outputs:
