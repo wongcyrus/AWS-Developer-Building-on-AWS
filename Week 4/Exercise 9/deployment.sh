@@ -28,6 +28,7 @@ rm db.yaml
 rm parameters.yaml
 rm web.yaml
 
+
 # aws cloudformation update-stack --stack-name edx-project-stack \
 # --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \

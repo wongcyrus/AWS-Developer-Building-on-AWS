@@ -1,7 +1,7 @@
 AWS Academy additional Permission:
 
 
-"cognito-idp:*", "ssm:*", "lambda:*", "cognito-sync:*", "cloud9:*", "cognito-identity:*",
+"cognito-idp:\*", "ssm:\*", "lambda:\*", "cognito-sync:\*", "cloud9:\*", "cognito-identity:\*",
 
 
 For Setup
