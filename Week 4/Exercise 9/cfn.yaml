@@ -91,12 +91,53 @@ Resources:
       Parameters:
         PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
 
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cognito.yaml' 
+      TimeoutInMinutes: 5
+      Parameters:
+        LogoutURL: !Sub "https://{!GetAtt WebpageCDN.DomainName}"
+        CallbackURL: !Sub "https://{!GetAtt WebpageCDN.DomainName}/callback"
+        AppDomain: hjghjfgfg555
+        
   ImageS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub 'imagebucket${AWS::AccountId}'
 
-      
+  WebpageCDN:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        DefaultCacheBehavior: 
+          AllowedMethods:
+            - DELETE
+            - GET
+            - HEAD
+            - OPTIONS
+            - PATCH
+            - POST
+            - PUT
+          MaxTTL: 0
+          MinTTL: 0
+          DefaultTTL: 0
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: all
+            Headers: 
+              - "*"
+          TargetOriginId: website #name of the origin
+          ViewerProtocolPolicy: redirect-to-https
+        DefaultRootObject: index.html
+        Enabled: true
+        Origins:
+          - DomainName: !GetAtt WebStack.Outputs.AlbDNSName
+            Id: website
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only 
+        PriceClass: PriceClass_100      
 Outputs:
   AccessKey:
     Value: !GetAtt IAMStack.Outputs.AccessKey
@@ -110,3 +151,6 @@ Outputs:
   MyDBEndpoint:
     Value: !GetAtt DBStack.Outputs.MyDBEndpoint
     Description: MySQL RDS
+  DomainName:
+    Value: !GetAtt WebpageCDN.DomainName
+    Description: Webpage CloudFront Domain name.

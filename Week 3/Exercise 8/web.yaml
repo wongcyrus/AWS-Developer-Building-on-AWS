@@ -178,3 +178,7 @@ Resources:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
       Protocol: HTTP
+Outputs:
+  AlbDNSName:
+    Value: !GetAtt LoadBalancer.DNSName
+    Description: ALB DNSName
