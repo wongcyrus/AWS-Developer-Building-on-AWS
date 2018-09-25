@@ -32,7 +32,9 @@ Resources:
 
   RDSCluster:
     Type: AWS::RDS::DBCluster
-    DependsOn: DBSecurityGroup
+    DependsOn: 
+      - DBSecurityGroup
+      - MyDBSubnetGroup
     Properties:
       DBClusterIdentifier: edx-photos-db
       MasterUsername: master
@@ -42,7 +44,6 @@ Resources:
         AutoPause: true
         MaxCapacity: 4
         MinCapacity: 2
-        SecondsBeforeAutoPause: 300
       Engine: aurora
       DBSubnetGroupName: !Ref MyDBSubnetGroup
       VpcSecurityGroupIds:
@@ -56,13 +57,11 @@ Resources:
       VpcId: !Ref EC2VpcId
       SecurityGroupIngress:
         - 
-          GroupName: !Ref WebSecurityGroup
           IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
           SourceSecurityGroupId: !Ref WebSecurityGroup
         - 
-          GroupName: !Ref EdxProjectCloud9Sg
           IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306

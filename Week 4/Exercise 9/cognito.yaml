@@ -10,7 +10,7 @@ Parameters:
     Default: http://localhost/callback  
   AppDomain:
     Type: String  
-    Default: hjghjgjkgjkh
+    Default: hjghjfgfg555
 Resources:
   SNSRole:
     Type: AWS::IAM::Role
@@ -233,7 +233,13 @@ Resources:
                           break;
                           
                       case 'Delete':
-                          response.send(event, context, response.SUCCESS,{});
+                          let params = {
+                            Domain: event.ResourceProperties.AppDomain,
+                            UserPoolId:  event.ResourceProperties.UserPoolId
+                          };
+                          cognitoIdentityServiceProvider.deleteUserPoolDomain(params).promise()
+                          .then(data=>response.send(event, context, response.SUCCESS,{}))
+                          .catch(error=>response.send(event, context, response.FAILED,{}));
                           break;
                   }
                   

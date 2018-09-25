@@ -7,7 +7,7 @@ sleep 5
 
 wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercises/ex-cognito.zip
 unzip -o ex-cognito.zip
-rm ex-rds.zip
+rm ex-cognito.zip
 yes | cp -f code/config.py exercise-cognito/FlaskApp/
 yes | cp -f code/database_create_tables.py exercise-cognito/Deploy/
 cd exercise-cognito
