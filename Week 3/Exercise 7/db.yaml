@@ -4,11 +4,11 @@ Metadata:
 Description: Build on AWS Project DB Stack.
 Parameters:
   EC2VpcId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
   PrivateSubnet1:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   PrivateSubnet2:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   DBPassword:
     NoEcho: 'true'
     Type: String

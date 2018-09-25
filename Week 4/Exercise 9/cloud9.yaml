@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Build on AWS Project Cloud9 Stack.
 Parameters:
   PublicSubnet1:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
 Resources:
   EdxProjectCloud9:
     Type: 'AWS::Cloud9::EnvironmentEC2'

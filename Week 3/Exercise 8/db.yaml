@@ -4,9 +4,9 @@ Metadata:
 Description: Build on AWS Project DB Tier Stack.
 Parameters:
   PrivateSubnet1:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   PrivateSubnet2:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   DBSecurityGroup:
     Type: String
   DBPassword:

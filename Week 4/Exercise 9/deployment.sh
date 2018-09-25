@@ -26,13 +26,16 @@ rm iam.yaml
 rm parameters.yaml
 rm web.yaml
 
+
 # aws cloudformation update-stack --stack-name edx-project-stack \
 # --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
-                ParameterKey=SourceBucket,ParameterValue=$SourceBucket
+                ParameterKey=SourceBucket,ParameterValue=$SourceBucket \
+                ParameterKey=AppDomain,ParameterValue=uniqueddfdsfd1111
+                
 
 aws cloudformation wait stack-create-complete --stack-name edx-project-stack
 AWS_ACCESS_KEY_ID=$(aws cloudformation describe-stacks --stack-name edx-project-stack \

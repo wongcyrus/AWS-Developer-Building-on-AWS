@@ -10,13 +10,12 @@ Parameters:
     Default: http://localhost/callback  
   AppDomain:
     Type: String  
-    Default: hjghjfgfg555
 Resources:
   SNSRole:
     Type: AWS::IAM::Role
     Description: "An IAM Role to allow Cognito to send SNS messages"
     Properties:
-      RoleName: !Sub ${AWS::StackName}-cognito-sns-role
+      RoleName: cognito-sns-role
       ManagedPolicyArns:
         - Ref: CognitoSNSPolicy
       AssumeRolePolicyDocument:
@@ -45,7 +44,7 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub ${AWS::StackName}-photos-pool
+      UserPoolName: photos-pool
       AliasAttributes: 
         - email
         - phone_number
@@ -81,7 +80,7 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Sub ${AWS::StackName}-WebsiteClient
+      ClientName: WebsiteClient
       GenerateSecret: true
       UserPoolId: !Ref CognitoUserPool
 
@@ -105,7 +104,7 @@ Resources:
   CognitoIdPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
-      IdentityPoolName: !Sub ${AWS::StackName}cognitoidpool
+      IdentityPoolName: edxcognitoidpool
       CognitoIdentityProviders: 
         -
           ClientId: !Ref CognitoUserPoolClient
@@ -116,7 +115,7 @@ Resources:
   CognitoCustomResourceRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: !Sub ${AWS::StackName}-cognito_resource_role
+      RoleName: cognito_resource_role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -181,7 +180,7 @@ Resources:
   CloudFormationCognitoUserPoolClientSettings:
     Type: 'AWS::Lambda::Function'
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-CloudFormationCognitoUserPoolClientSettings
+      FunctionName: CloudFormationCognitoUserPoolClientSettings
       Runtime: nodejs8.10
       Code:
         ZipFile: >

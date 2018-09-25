@@ -20,6 +20,11 @@ Parameters:
     MinLength: '1'
     MaxLength: '41'
     ConstraintDescription: the password must be between 1 and 41 characters.
+  AppDomain:
+    Type: String
+    Description: Unique subdomain for cognito app.
+    AllowedPattern: ^[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?$
+    ConstraintDescription: Domain names can only contain lower-case letters, numbers, and hyphens.
 Resources:
   IAMStack:  
     Type: AWS::CloudFormation::Stack
@@ -97,9 +102,18 @@ Resources:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cognito.yaml' 
       TimeoutInMinutes: 5
       Parameters:
-        LogoutURL: !Sub "https://{!GetAtt WebpageCDN.DomainName}"
-        CallbackURL: !Sub "https://{!GetAtt WebpageCDN.DomainName}/callback"
-        AppDomain: hjghjfgfg555
+        LogoutURL: 
+          !Join
+          - ''
+          - - 'https://'
+            - !GetAtt WebpageCDN.DomainName
+        CallbackURL:
+          !Join
+          - ''
+          - - 'https://'
+            - !GetAtt WebpageCDN.DomainName
+            - '/callback'
+        AppDomain: !Ref AppDomain
         
   ImageS3Bucket:
     Type: AWS::S3::Bucket

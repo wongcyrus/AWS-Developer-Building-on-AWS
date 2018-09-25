@@ -6,19 +6,19 @@ Parameters:
   SourceBucket:
     Type: String
   EC2VpcId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
   PublicSubnet1:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   PublicSubnet2:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   PrivateSubnet1:
-    Type: String  
+    Type: AWS::EC2::Subnet::Id  
   PrivateSubnet2:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   WebServerInstanceProfile:
     Type: String
   WebSecurityGroup:
-    Type: String
+    Type: AWS::EC2::SecurityGroup::Id
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2

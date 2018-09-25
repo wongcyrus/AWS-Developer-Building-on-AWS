@@ -4,11 +4,11 @@ Metadata:
 Description: Build on AWS Project DB Tier Stack.
 Parameters:
   EC2VpcId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
   PrivateSubnet1:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   PrivateSubnet2:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
   DBPassword:
     NoEcho: 'true'
     Type: String
@@ -17,9 +17,9 @@ Parameters:
     MaxLength: '41'
     ConstraintDescription: the password must be between 1 and 41 characters
   WebSecurityGroup:
-    Type: String
+    Type: AWS::EC2::SecurityGroup::Id
   EdxProjectCloud9Sg:
-    Type: String
+    Type: AWS::EC2::SecurityGroup::Id
 Resources:
   MyDBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup

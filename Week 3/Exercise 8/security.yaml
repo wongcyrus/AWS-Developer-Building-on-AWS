@@ -4,7 +4,7 @@ Metadata:
 Description: Build on AWS Project Security Stack.
 Parameters:
   EC2VpcId:
-    Type: String
+    Type: AWS::EC2::VPC::Id
 Resources:
   WebServerRole: 
     Type: AWS::IAM::Role
