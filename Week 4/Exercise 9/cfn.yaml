@@ -151,7 +151,7 @@ Resources:
             Id: website
             CustomOriginConfig:
               OriginProtocolPolicy: https-only 
-        PriceClass: PriceClass_100      
+        PriceClass: PriceClass_All      
 Outputs:
   AccessKey:
     Value: !GetAtt IAMStack.Outputs.AccessKey
