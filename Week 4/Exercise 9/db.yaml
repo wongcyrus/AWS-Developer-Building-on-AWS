@@ -24,7 +24,6 @@ Resources:
   MyDBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties: 
-      DBSubnetGroupName: MyDBSubnetGroup
       DBSubnetGroupDescription: MyDBSubnetGroup
       SubnetIds:
         - !Ref PrivateSubnet1
@@ -32,9 +31,6 @@ Resources:
 
   RDSCluster:
     Type: AWS::RDS::DBCluster
-    DependsOn: 
-      - DBSecurityGroup
-      - MyDBSubnetGroup
     Properties:
       DBClusterIdentifier: edx-photos-db
       MasterUsername: master
@@ -52,7 +48,6 @@ Resources:
   DBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: db-sg
       GroupDescription: DB traffic
       VpcId: !Ref EC2VpcId
       SecurityGroupIngress:
