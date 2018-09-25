@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: Build on AWS Project DB Tier Stack.
+Parameters:
+  EC2VpcId:
+    Type: String
+  PrivateSubnet1:
+    Type: String
+  PrivateSubnet2:
+    Type: String
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: New account and RDS password
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters
+  WebSecurityGroup:
+    Type: String
+  EdxProjectCloud9Sg:
+    Type: String
+Resources:
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupName: MyDBSubnetGroup
+      DBSubnetGroupDescription: MyDBSubnetGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  RDSCluster:
+    Type: AWS::RDS::DBCluster
+    DependsOn: DBSecurityGroup
+    Properties:
+      DBClusterIdentifier: edx-photos-db
+      MasterUsername: master
+      MasterUserPassword: !Ref DBPassword
+      EngineMode: serverless
+      ScalingConfiguration:
+        AutoPause: true
+        MaxCapacity: 4
+        MinCapacity: 2
+        SecondsBeforeAutoPause: 300
+      Engine: aurora
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DBSecurityGroup
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: db-sg
+      GroupDescription: DB traffic
+      VpcId: !Ref EC2VpcId
+      SecurityGroupIngress:
+        - 
+          GroupName: !Ref WebSecurityGroup
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebSecurityGroup
+        - 
+          GroupName: !Ref EdxProjectCloud9Sg
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref EdxProjectCloud9Sg          
+      SecurityGroupEgress:
+        -
+          IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+          
+Outputs:
+  MyDBEndpoint:
+    Value: !GetAtt RDSCluster.Endpoint.Address
+    Description: MyDB Endpoint

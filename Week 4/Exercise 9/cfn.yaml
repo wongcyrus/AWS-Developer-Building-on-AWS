@@ -50,9 +50,11 @@ Resources:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
       TimeoutInMinutes: 30
       Parameters:
+        EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+        WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
+        EdxProjectCloud9Sg: !GetAtt Cloud9Stack.Outputs.EdxProjectCloud9Sg
         PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
         PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
-        DBSecurityGroup: !GetAtt SecurityStack.Outputs.DBSecurityGroup
         DBPassword: !Ref DBPassword
 
   WebStack:  
