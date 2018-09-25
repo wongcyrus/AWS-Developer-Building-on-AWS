@@ -33,6 +33,7 @@ Resources:
     Type: AWS::RDS::DBCluster
     Properties:
       DBClusterIdentifier: edx-photos-db
+      DatabaseName: Photos
       MasterUsername: master
       MasterUserPassword: !Ref DBPassword
       EngineMode: serverless

@@ -1,4 +1,4 @@
-aws ssm start-session --target i-0f50fefea5df59a64
+aws ssm start-session --target $InstanceId
 sudo su ec2-user
 cd ~
 cat /var/log/cloud-init-output.log
