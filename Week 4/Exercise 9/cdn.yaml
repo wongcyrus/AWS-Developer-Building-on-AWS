@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: Build on AWS Project CDN Tier Stack.
+Parameters:
+  SourceBucket:
+    Type: String
+  EC2VpcId:
+    Type: AWS::EC2::VPC::Id
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet::Id
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet::Id
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2
+Resources:
+
+  WebpageCDN:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        DefaultCacheBehavior: 
+          AllowedMethods:
+            - DELETE
+            - GET
+            - HEAD
+            - OPTIONS
+            - PATCH
+            - POST
+            - PUT
+          MaxTTL: 0
+          MinTTL: 0
+          DefaultTTL: 0
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: all
+            Headers: 
+              - "*"
+          TargetOriginId: website #name of the origin
+          ViewerProtocolPolicy: redirect-to-https
+        DefaultRootObject: index.html
+        Enabled: true
+        Origins:
+          - DomainName: !GetAtt LoadBalancer.DNSName
+            Id: website
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only 
+        PriceClass: PriceClass_All      
+  
+  
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - Ref: PublicSubnet1
+        - Ref: PublicSubnet2
+      LoadBalancerAttributes:
+        -   
+          Key: idle_timeout.timeout_seconds
+          Value: '50'
+      SecurityGroups:
+        - Ref: WebSecurityGroup
+  
+Outputs:
+  AlbDNSName:
+    Value: !GetAtt LoadBalancer.DNSName
+    Description: ALB DNSName
+  DomainName:
+    Value: !GetAtt WebpageCDN.DomainName
+    Description: Webpage CloudFront Domain name.

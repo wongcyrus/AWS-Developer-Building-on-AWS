@@ -18,11 +18,10 @@ rm -rf exercise-cognito
 
 cp ../../Week\ 1/Exercise\ 3/vpc.yaml .
 cp ../../Week\ 2/Exercise\ 5/iam.yaml .
-cp ../../Week\ 3/Exercise\ 8/web.yaml .
 aws s3 sync . s3://$SourceBucket 
 rm vpc.yaml
 rm iam.yaml
-rm web.yaml
+
 
 # aws cloudformation update-stack --stack-name edx-project-stack \
 # --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \

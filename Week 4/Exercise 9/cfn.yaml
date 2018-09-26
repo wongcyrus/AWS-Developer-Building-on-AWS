@@ -64,22 +64,34 @@ Resources:
 
   WebStack:  
     Type: AWS::CloudFormation::Stack
-    DependsOn: DBStack
+    DependsOn: ParametesStack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/web.yaml' 
       TimeoutInMinutes: 10
       Parameters:
         SourceBucket: !Ref SourceBucket
         EC2VpcId: !GetAtt VPCStack.Outputs.VPC
-        PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
-        PublicSubnet2: !GetAtt VPCStack.Outputs.PublicSubnet2
         PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
         PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
         WebServerInstanceProfile: !GetAtt SecurityStack.Outputs.WebServerInstanceProfile
         WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
 
+
+  CDNStack:  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cdn.yaml' 
+      TimeoutInMinutes: 10
+      Parameters:
+        SourceBucket: !Ref SourceBucket
+        EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+        PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
+        PublicSubnet2: !GetAtt VPCStack.Outputs.PublicSubnet2
+        WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
+        
   ParametesStack:  
     Type: AWS::CloudFormation::Stack
+    DependsOn: DBStack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/parameters.yaml' 
       TimeoutInMinutes: 5
@@ -94,7 +106,7 @@ Resources:
             - ".auth."
             - ${AWS::Region}
             - ".amazoncognito.com"
-        BASE_URL: !GetAtt WebStack.Outputs.AlbDNSName
+        BASE_URL: !GetAtt CDNStack.Outputs.AlbDNSName
         ImageS3Bucket: !Ref ImageS3Bucket
         DBPassword: !Ref DBPassword
         MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint
@@ -117,12 +129,12 @@ Resources:
           !Join
           - ''
           - - 'https://'
-            - !GetAtt WebpageCDN.DomainName
+            - !GetAtt CDNStack.Outputs.DomainName
         CallbackURL:
           !Join
           - ''
           - - 'https://'
-            - !GetAtt WebpageCDN.DomainName
+            - !GetAtt CDNStack.Outputs.DomainName
             - '/callback'
         AppDomain: !Ref AppDomain
         
@@ -130,39 +142,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub 'imagebucket${AWS::AccountId}'
-
-  WebpageCDN:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        DefaultCacheBehavior: 
-          AllowedMethods:
-            - DELETE
-            - GET
-            - HEAD
-            - OPTIONS
-            - PATCH
-            - POST
-            - PUT
-          MaxTTL: 0
-          MinTTL: 0
-          DefaultTTL: 0
-          ForwardedValues:
-            QueryString: true
-            Cookies:
-              Forward: all
-            Headers: 
-              - "*"
-          TargetOriginId: website #name of the origin
-          ViewerProtocolPolicy: redirect-to-https
-        DefaultRootObject: index.html
-        Enabled: true
-        Origins:
-          - DomainName: !GetAtt WebStack.Outputs.AlbDNSName
-            Id: website
-            CustomOriginConfig:
-              OriginProtocolPolicy: https-only 
-        PriceClass: PriceClass_All      
+   
 Outputs:
   AccessKey:
     Value: !GetAtt IAMStack.Outputs.AccessKey
@@ -177,5 +157,5 @@ Outputs:
     Value: !GetAtt DBStack.Outputs.MyDBEndpoint
     Description: MySQL RDS
   DomainName:
-    Value: !GetAtt WebpageCDN.DomainName
+    Value: !GetAtt CDNStack.Outputs.DomainName
     Description: Webpage CloudFront Domain name.
