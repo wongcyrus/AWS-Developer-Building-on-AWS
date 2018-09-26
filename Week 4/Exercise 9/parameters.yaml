@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Build on AWS Project Parameter Stack.
+Parameters: 
+  COGNITO_POOL_ID:
+    Type: String
+  COGNITO_CLIENT_ID:
+    Type: String
+  COGNITO_CLIENT_SECRET:
+    Type: String
+  COGNITO_DOMAIN:
+    Type: String
+  BASE_URL:
+    Type: String
+  MyDBEndpoint:
+    Type: String
+  ImageS3Bucket:
+    Type: String
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: RDS Password.
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters.
+Resources:
+  CognitoPoolIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-COGNITO_POOL_ID
+      Type: String
+      Value: !Ref COGNITO_CLIENT_ID
+      
+  CognitoClientIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-COGNITO_CLIENT_ID
+      Type: String
+      Value: !Ref COGNITO_CLIENT_ID
+      
+  CognitoClientSecretParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-COGNITO_CLIENT_SECRET
+      Type: String
+      Value: !Ref COGNITO_CLIENT_SECRET
+
+  CognitoDomainParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-COGNITO_DOMAIN
+      Type: String
+      Value: !Ref COGNITO_DOMAIN
+      
+  BaseUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-BASE_URL
+      Type: String
+      Value: !Ref BASE_URL      
+      
+  DBHostParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_HOST
+      Type: String
+      Value: !Ref MyDBEndpoint
+
+  DBUserParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_USER
+      Type: String
+      Value: web_user
+    
+  DBPasswordParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_PASSWORD
+      Type: String
+      Value: !Ref DBPassword
+
+  DBNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-DATABASE_DB_NAME
+      Type: String
+      Value: Photos
+    
+  FlaskSecretParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-FLASK_SECRET
+      Type: String
+      Value: secret
+    
+  PhotosBuckeTParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: edx-PHOTOS_BUCKET
+      Type: String
+      Value: !Ref ImageS3Bucket
+      
+

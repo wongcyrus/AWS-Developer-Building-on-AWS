@@ -21,7 +21,7 @@ os.environ['AWS_DEFAULT_REGION'] = region
 def get_parameter():
     import boto3
     client = boto3.client('ssm',region_name=region)
-    keys =['PHOTOS_BUCKET','FLASK_SECRET','DATABASE_HOST','DATABASE_USER','DATABASE_PASSWORD','DATABASE_DB_NAME']
+    keys =['PHOTOS_BUCKET','FLASK_SECRET','DATABASE_HOST','DATABASE_USER', 'DATABASE_PASSWORD', 'DATABASE_DB_NAME', 'COGNITO_POOL_ID', 'COGNITO_CLIENT_ID', 'COGNITO_CLIENT_SECRET', 'COGNITO_DOMAIN', 'BASE_URL']
     ssm_keys = list(map(lambda k: "edx-" + k, keys))
     response = client.get_parameters(
         Names = ssm_keys,
@@ -38,3 +38,12 @@ DATABASE_HOST = parameters['DATABASE_HOST']
 DATABASE_USER = parameters['DATABASE_USER']
 DATABASE_PASSWORD = parameters['DATABASE_PASSWORD']
 DATABASE_DB_NAME = parameters['DATABASE_DB_NAME']
+
+
+AWS_REGION = region
+COGNITO_POOL_ID = parameters['COGNITO_POOL_ID']
+COGNITO_CLIENT_ID = parameters['COGNITO_CLIENT_ID']
+COGNITO_CLIENT_SECRET = parameters['COGNITO_CLIENT_SECRET']
+COGNITO_DOMAIN = parameters['COGNITO_DOMAIN']
+BASE_URL = parameters['BASE_URL']
+
