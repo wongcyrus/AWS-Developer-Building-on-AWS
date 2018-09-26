@@ -10,6 +10,7 @@ unzip -o ex-cognito.zip
 rm ex-cognito.zip
 yes | cp -f code/config.py exercise-cognito/FlaskApp/
 yes | cp -f code/database_create_tables.py exercise-cognito/Deploy/
+yes | cp -f code/app.ini exercise-cognito/Deploy/
 cd exercise-cognito
 zip -ro deploy-app.zip Deploy/ FlaskApp/
 aws s3 cp deploy-app.zip s3://$SourceBucket/

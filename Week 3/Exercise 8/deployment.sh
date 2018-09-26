@@ -10,6 +10,7 @@ unzip -o ex-rds.zip
 rm ex-rds.zip
 yes | cp -f code/config.py exercise-rds/FlaskApp/
 yes | cp -f code/database_create_tables.py exercise-rds/Deploy/
+yes | cp -f code/app.ini exercise-rds/Deploy/
 cd exercise-rds
 zip -ro deploy-app.zip Deploy/ FlaskApp/
 aws s3 cp deploy-app.zip s3://$SourceBucket/
