@@ -23,11 +23,17 @@ def get_parameter():
     client = boto3.client('ssm',region_name=region)
     keys =['PHOTOS_BUCKET','FLASK_SECRET','DATABASE_HOST','DATABASE_USER', 'DATABASE_PASSWORD', 'DATABASE_DB_NAME', 'COGNITO_POOL_ID', 'COGNITO_CLIENT_ID', 'COGNITO_CLIENT_SECRET', 'COGNITO_DOMAIN', 'BASE_URL']
     ssm_keys = list(map(lambda k: "edx-" + k, keys))
-    response = client.get_parameters(
-        Names = ssm_keys,
+    #it just supports 10 parameters each time!
+    response1 = client.get_parameters(
+        Names = ssm_keys[:10],
         WithDecryption = False
     )
-    return dict(map(lambda x: (x['Name'].replace("edx-",""),x['Value']), response["Parameters"]))
+    response2 = client.get_parameters(
+        Names = ssm_keys[10:],
+        WithDecryption = False
+    )
+    return dict(map(lambda x: (x['Name'].replace("edx-",""),x['Value']), response1["Parameters"] + response2["Parameters"]))
+    
     
 parameters = get_parameter()
     
