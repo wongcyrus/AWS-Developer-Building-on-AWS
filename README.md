@@ -13,6 +13,7 @@ AWS Academy additional Permission
 "cognito-idp:\*", "ssm:\*", "lambda:\*", "cognito-sync:\*", "cloud9:\*", "cognito-identity:\*",
 
 
-2. Remove deny delete vpc and subnet in line policy of awsstudent.
+2. Remove deny delete vpc and subnet in line policy default_policy of awsstudent.
 
 
+"ec2:DeleteVpc","ec2:DeleteSubnet",

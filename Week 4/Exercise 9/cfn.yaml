@@ -75,7 +75,7 @@ Resources:
         PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
         WebServerInstanceProfile: !GetAtt SecurityStack.Outputs.WebServerInstanceProfile
         WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
-
+        LoadBalancerArn: !GetAtt CDNStack.Outputs.LoadBalancerArn
 
   CDNStack:  
     Type: AWS::CloudFormation::Stack

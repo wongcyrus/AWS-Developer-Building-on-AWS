@@ -72,3 +72,5 @@ Outputs:
   DomainName:
     Value: !GetAtt WebpageCDN.DomainName
     Description: Webpage CloudFront Domain name.
+  LoadBalancerArn:
+    Value: !Ref LoadBalancerArn

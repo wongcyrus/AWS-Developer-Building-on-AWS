@@ -1,4 +1,4 @@
-Description: Building on AWS VPC Stack
+Description: Build on AWS VPC Stack
 Resources:
   VPC:
     Type: 'AWS::EC2::VPC'
