@@ -257,14 +257,14 @@ Outputs:
     Description: The Pool ID of the Cognito User Pool
     Value: !Ref CognitoUserPool
   CognitoUserPoolProviderURL:
-    Description: The Pool ID of the Cognito User Pool
+    Description: The Pool ProviderURL of the Cognito User Pool
     Value: !GetAtt CognitoUserPool.ProviderURL
   CognitoUserPoolArn:
-    Description: The Pool ID of the Cognito User Pool
+    Description: The Pool Arn of the Cognito User Pool
     Value: !GetAtt CognitoUserPool.Arn   
   CognitoUserPoolClientId:
-    Description: The Client ID 
+    Description: The App Client ID 
     Value: !Ref CognitoUserPoolClient
   ClientSecret:
-    Description: The Client ID 
+    Description: The Client Secret 
     Value: !GetAtt CognitoUserPoolClientClientSettings.ClientSecret

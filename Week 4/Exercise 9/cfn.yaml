@@ -96,17 +96,17 @@ Resources:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/parameters.yaml' 
       TimeoutInMinutes: 15
       Parameters:
-        COGNITO_POOL_ID: !GetAtt CognitoStack.Outputs.CognitoUserPoolId
-        COGNITO_CLIENT_ID: !GetAtt CognitoStack.Outputs.CognitoUserPoolClientId
-        COGNITO_CLIENT_SECRET: !GetAtt CognitoStack.Outputs.ClientSecret
-        COGNITO_DOMAIN: 
+        CognitoPoolId: !GetAtt CognitoStack.Outputs.CognitoUserPoolId
+        CognitoClientId: !GetAtt CognitoStack.Outputs.CognitoUserPoolClientId
+        CognitoClientSecret: !GetAtt CognitoStack.Outputs.ClientSecret
+        CognitoDomain: 
           !Join
           - ''
           - - !Ref AppDomain
             - ".auth."
             - ${AWS::Region}
             - ".amazoncognito.com"
-        BASE_URL: !GetAtt CDNStack.Outputs.AlbDNSName
+        BaseUrl: !GetAtt CDNStack.Outputs.AlbDNSName
         ImageS3Bucket: !Ref ImageS3Bucket
         DBPassword: !Ref DBPassword
         MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint

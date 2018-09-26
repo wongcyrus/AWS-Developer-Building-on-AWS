@@ -1,15 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Build on AWS Project Parameter Stack.
 Parameters: 
-  COGNITO_POOL_ID:
+  CognitoPoolId:
     Type: String
-  COGNITO_CLIENT_ID:
+  CognitoClientId:
     Type: String
-  COGNITO_CLIENT_SECRET:
+  CognitoClientSecret:
     Type: String
-  COGNITO_DOMAIN:
+  CognitoDomain:
     Type: String
-  BASE_URL:
+  BaseUrl:
     Type: String
   MyDBEndpoint:
     Type: String
@@ -28,35 +28,35 @@ Resources:
     Properties:
       Name: edx-COGNITO_POOL_ID
       Type: String
-      Value: !Ref COGNITO_CLIENT_ID
+      Value: !Ref CognitoPoolId
       
   CognitoClientIdParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: edx-COGNITO_CLIENT_ID
       Type: String
-      Value: !Ref COGNITO_CLIENT_ID
+      Value: !Ref CognitoClientId
       
   CognitoClientSecretParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: edx-COGNITO_CLIENT_SECRET
       Type: String
-      Value: !Ref COGNITO_CLIENT_SECRET
+      Value: !Ref CognitoClientSecret
 
   CognitoDomainParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: edx-COGNITO_DOMAIN
       Type: String
-      Value: !Ref COGNITO_DOMAIN
+      Value: !Ref CognitoDomain
       
   BaseUrlParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: edx-BASE_URL
       Type: String
-      Value: !Ref BASE_URL      
+      Value: !Ref BaseUrl      
       
   DBHostParameter:
     Type: AWS::SSM::Parameter
