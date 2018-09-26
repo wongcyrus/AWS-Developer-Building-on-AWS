@@ -22,7 +22,7 @@ aws s3 sync . s3://$SourceBucket
 rm vpc.yaml
 rm iam.yaml
 
-
+random=$(shuf -i 2000-65000 -n 1)
 # aws cloudformation update-stack --stack-name edx-project-stack \
 # --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
@@ -30,7 +30,7 @@ aws cloudformation create-stack --stack-name edx-project-stack --template-body f
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
                 ParameterKey=SourceBucket,ParameterValue=$SourceBucket \
-                ParameterKey=AppDomain,ParameterValue=uniqueddfdsfd1111
+                ParameterKey=AppDomain,ParameterValue=uniqueedx$random
                 
 
 aws cloudformation wait stack-create-complete --stack-name edx-project-stack

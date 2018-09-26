@@ -53,7 +53,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
-      TimeoutInMinutes: 30
+      TimeoutInMinutes: 20
       Parameters:
         EC2VpcId: !GetAtt VPCStack.Outputs.VPC
         WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
@@ -81,7 +81,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cdn.yaml' 
-      TimeoutInMinutes: 10
+      TimeoutInMinutes: 30
       Parameters:
         SourceBucket: !Ref SourceBucket
         EC2VpcId: !GetAtt VPCStack.Outputs.VPC
@@ -94,7 +94,7 @@ Resources:
     DependsOn: DBStack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/parameters.yaml' 
-      TimeoutInMinutes: 5
+      TimeoutInMinutes: 15
       Parameters:
         COGNITO_POOL_ID: !GetAtt CognitoStack.Outputs.CognitoUserPoolId
         COGNITO_CLIENT_ID: !GetAtt CognitoStack.Outputs.CognitoUserPoolClientId
