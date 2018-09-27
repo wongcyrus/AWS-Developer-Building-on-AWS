@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata: 
   License: Apache-2.0
-Description: 'Build on AWS Project IAM User Stack.'
+Description: Build on AWS IAM User Stack
 Parameters:
   Password:
     NoEcho: 'true'

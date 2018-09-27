@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Build on AWS Project Parameter Stack.
+Description: Build on AWS Parameter Stack.
 Parameters: 
   CognitoPoolId:
     Type: String

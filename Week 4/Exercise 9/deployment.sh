@@ -31,7 +31,7 @@ aws cloudformation create-stack --stack-name edx-project-stack --template-body f
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
                 ParameterKey=SourceBucket,ParameterValue=$SourceBucket \
-                ParameterKey=AppDomain,ParameterValue=uniqueedx$random
+                ParameterKey=AppDomain,ParameterValue=uniqueedx$AWSAccountIdx$random
                 
 
 aws cloudformation wait stack-create-complete --stack-name edx-project-stack
