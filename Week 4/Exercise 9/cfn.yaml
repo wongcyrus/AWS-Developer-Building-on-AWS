@@ -100,7 +100,11 @@ Resources:
         CognitoClientId: !GetAtt CognitoStack.Outputs.CognitoUserPoolClientId
         CognitoClientSecret: !GetAtt CognitoStack.Outputs.ClientSecret
         CognitoDomain: !Sub "${AppDomain}.auth.${AWS::Region}.amazoncognito.com"
-        BaseUrl: !GetAtt CDNStack.Outputs.AlbDNSName
+        BaseUrl: 
+          !Join
+          - ''
+          - - 'https://'
+            - !GetAtt CDNStack.Outputs.DomainName
         ImageS3Bucket: !Ref ImageS3Bucket
         DBPassword: !Ref DBPassword
         MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint
