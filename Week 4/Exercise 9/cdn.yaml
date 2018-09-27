@@ -45,8 +45,9 @@ Resources:
         DefaultRootObject: index.html
         Enabled: true
         Origins:
-          - DomainName: !GetAtt LoadBalancer.DNSName
+          - DomainName: !Sub "${Api}.execute-api.${AWS::Region}.amazonaws.com"
             Id: website
+            OriginPath: '/Prod'
             CustomOriginConfig:
               OriginProtocolPolicy: https-only 
         PriceClass: PriceClass_All      
@@ -64,6 +65,73 @@ Resources:
           Value: '50'
       SecurityGroups:
         - Ref: WebSecurityGroup
+
+
+  Api:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: WebProxyApi
+
+  Resource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt Api.RootResourceId
+      RestApiId: !Ref Api
+      PathPart: '{proxy+}'
+
+  RootMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: ANY
+      ResourceId: !GetAtt Api.RootResourceId
+      RestApiId: !Ref Api
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: ANY
+        Type: HTTP_PROXY
+        Uri:
+          !Join
+          - ''
+          - - 'http://'
+            - !GetAtt LoadBalancer.DNSName
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+
+  ProxyMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: ANY
+      ResourceId: !Ref Resource
+      RestApiId: !Ref Api
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.proxy: true
+      Integration:
+        CacheKeyParameters:
+          - 'method.request.path.proxy'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        IntegrationHttpMethod: ANY
+        Type: HTTP_PROXY
+        Uri:
+          !Join
+          - ''
+          - - 'http://'
+            - !GetAtt LoadBalancer.DNSName
+            - '/{proxy}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+
+  Deployment:
+    DependsOn:
+      - RootMethod
+      - ProxyMethod
+    Type: 'AWS::ApiGateway::Deployment'
+    Properties:
+      RestApiId: !Ref Api
+      StageName: Prod
   
 Outputs:
   AlbDNSName:

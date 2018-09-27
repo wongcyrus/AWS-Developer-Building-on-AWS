@@ -99,13 +99,7 @@ Resources:
         CognitoPoolId: !GetAtt CognitoStack.Outputs.CognitoUserPoolId
         CognitoClientId: !GetAtt CognitoStack.Outputs.CognitoUserPoolClientId
         CognitoClientSecret: !GetAtt CognitoStack.Outputs.ClientSecret
-        CognitoDomain: 
-          !Join
-          - ''
-          - - !Ref AppDomain
-            - ".auth."
-            - ${AWS::Region}
-            - ".amazoncognito.com"
+        CognitoDomain: !Sub "${AppDomain}.auth.${AWS::Region}.amazoncognito.com"
         BaseUrl: !GetAtt CDNStack.Outputs.AlbDNSName
         ImageS3Bucket: !Ref ImageS3Bucket
         DBPassword: !Ref DBPassword
