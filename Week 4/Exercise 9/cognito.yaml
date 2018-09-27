@@ -61,9 +61,9 @@ Resources:
           RequireSymbols: true
           RequireUppercase: true
       Schema: 
-        - Name: name
+        - Name: nickname
           AttributeDataType: String
-          Mutable: true
+          Mutable: false
           Required: true
         - Name: email
           AttributeDataType: String
