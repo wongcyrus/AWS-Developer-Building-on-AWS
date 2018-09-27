@@ -50,8 +50,8 @@ Resources:
         - phone_number
       AutoVerifiedAttributes:
         - email
-      EmailVerificationMessage: Dear {name}, Your verification code is {####}
-      EmailVerificationSubject: Email verification
+      EmailVerificationMessage: "Dear user, Your verification code is {####}"
+      EmailVerificationSubject: EDX Email Verification
       MfaConfiguration: OPTIONAL
       Policies: 
         PasswordPolicy:

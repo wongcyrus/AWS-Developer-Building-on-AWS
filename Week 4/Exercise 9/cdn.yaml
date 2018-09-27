@@ -45,7 +45,6 @@ Resources:
               - Content-Type
           TargetOriginId: website #name of the origin
           ViewerProtocolPolicy: redirect-to-https
-        DefaultRootObject: index.html
         Enabled: true
         Origins:
           - DomainName: !Sub "${Api}.execute-api.${AWS::Region}.amazonaws.com"
