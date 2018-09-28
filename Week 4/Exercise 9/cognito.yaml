@@ -50,7 +50,7 @@ Resources:
         - phone_number
       AutoVerifiedAttributes:
         - email
-      EmailVerificationMessage: "Dear user, Your verification code is {####}"
+      EmailVerificationMessage: "Dear user, Your verification code is \n{####}\n"
       EmailVerificationSubject: EDX Email Verification
       MfaConfiguration: OPTIONAL
       Policies: 

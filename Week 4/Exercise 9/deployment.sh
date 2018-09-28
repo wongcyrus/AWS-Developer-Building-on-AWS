@@ -10,6 +10,7 @@ unzip -o ex-cognito.zip
 rm ex-cognito.zip
 yes | cp -f code/config.py exercise-cognito/FlaskApp/
 yes | cp -f code/database_create_tables.py exercise-cognito/Deploy/
+yes | cp -f code/nginx.config exercise-cognito/Deploy/
 yes | cp -f code/app.ini exercise-cognito/Deploy/
 cd exercise-cognito
 zip -ro deploy-app.zip Deploy/ FlaskApp/
@@ -31,7 +32,7 @@ aws cloudformation create-stack --stack-name edx-project-stack --template-body f
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
                 ParameterKey=SourceBucket,ParameterValue=$SourceBucket \
-                ParameterKey=AppDomain,ParameterValue=uniqueedx$AWSAccountIdx$random
+                ParameterKey=AppDomain,ParameterValue=uniqueedx$AWSAccountId$random
                 
 
 aws cloudformation wait stack-create-complete --stack-name edx-project-stack

@@ -67,6 +67,26 @@ Resources:
       SecurityGroups:
         - Ref: WebSecurityGroup
 
+  CloudWatchRole: 
+   Type: AWS::IAM::Role
+   Properties: 
+    AssumeRolePolicyDocument: 
+     Version: "2012-10-17"
+     Statement: 
+      - Effect: Allow
+        Principal: 
+         Service: 
+          - "apigateway.amazonaws.com"
+        Action: "sts:AssumeRole"
+    Path: "/"
+    ManagedPolicyArns: 
+     - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  
+  Account: 
+   Type: AWS::ApiGateway::Account
+   Properties: 
+    CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+      
   Api:
     Type: 'AWS::ApiGateway::RestApi'
     Properties:
@@ -74,6 +94,8 @@ Resources:
       BinaryMediaTypes:
         - "image/png"
         - "image/jpeg"
+        - "image/gif"
+        - "image/bmp"
 
   Resource:
     Type: 'AWS::ApiGateway::Resource'
@@ -135,6 +157,8 @@ Resources:
     Properties:
       RestApiId: !Ref Api
       StageName: Prod
+      StageDescription:
+        LoggingLevel: INFO
   
 Outputs:
   AlbDNSName:
