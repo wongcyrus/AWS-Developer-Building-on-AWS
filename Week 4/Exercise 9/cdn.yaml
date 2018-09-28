@@ -13,9 +13,6 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   WebSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
-  LatestAmiId:
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2
 Resources:
 
   WebpageCDN:
