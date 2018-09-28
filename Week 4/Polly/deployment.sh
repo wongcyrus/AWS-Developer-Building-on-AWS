@@ -40,6 +40,19 @@ aws cloudformation update-stack --stack-name edx-project-stack \
                 
 aws cloudformation wait stack-update-complete --stack-name edx-project-stack
 
+InstanceIdWebServer1=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer1" \
+--query 'Reservations[0].Instances[0].InstanceId' --output text)
+InstanceIdWebServer2=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer2" \
+--query 'Reservations[0].Instances[0].InstanceId' --output text)
+CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
+--comment "Update code" \
+--instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
+--parameters commands="service --status-all" \
+--region $AWS_DEFAULT_REGION \
+--output text --query "Command.CommandId")
+sleep 10
+aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
+aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
 
 pip install awscli --upgrade --user
 curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o "session-manager-plugin.rpm"
