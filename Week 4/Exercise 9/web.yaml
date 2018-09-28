@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Build on AWS Web Server Stack.
+Description: Building on AWS Web Server Stack.
 Parameters:
   SourceBucket:
     Type: String

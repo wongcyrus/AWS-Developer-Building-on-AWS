@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Build on AWS Cognito Stack.
+Description: 'Building on AWS Cognito Stack.
   Modified https://github.com/rosberglinhares/CloudFormationCognitoCustomResources'
 Parameters:
   LogoutURL:
@@ -50,7 +50,7 @@ Resources:
         - phone_number
       AutoVerifiedAttributes:
         - email
-      EmailVerificationMessage: "Dear user, Your verification code is \n{####}\n"
+      EmailVerificationMessage: "Hi, Your verification code is <br/>{####}\n"
       EmailVerificationSubject: EDX Email Verification
       MfaConfiguration: OPTIONAL
       Policies: 

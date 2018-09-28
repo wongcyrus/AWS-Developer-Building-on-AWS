@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata: 
   License: Apache-2.0
-Description: Build on AWS CDN Tier Stack
+Description: Building on AWS CDN Tier Stack
 Parameters:
   SourceBucket:
     Type: String
@@ -92,10 +92,11 @@ Resources:
     Properties:
       Name: WebProxyApi
       BinaryMediaTypes:
-        - "image/png"
-        - "image/jpeg"
-        - "image/gif"
-        - "image/bmp"
+        - image/png
+        - image/jpeg
+        - image/gif
+        - image/bmp
+        - application/octet-stream
 
   Resource:
     Type: 'AWS::ApiGateway::Resource'

@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata: 
   License: Apache-2.0
-Description: Build on AWS Project Security Stack.
+Description: Building on AWS Project Security Stack.
 Parameters:
   EC2VpcId:
     Type: AWS::EC2::VPC::Id
