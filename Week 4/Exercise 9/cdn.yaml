@@ -93,6 +93,7 @@ Resources:
         - image/jpeg
         - image/gif
         - image/bmp
+        - audio/mpeg
 
   Resource:
     Type: 'AWS::ApiGateway::Resource'

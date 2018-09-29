@@ -23,6 +23,7 @@ rm parameters.yaml
 rm web.yaml
 
 cd code
+aws s3 cp app.ini s3://$SourceBucket/
 aws s3 cp application.py s3://$SourceBucket/
 aws s3 cp main.html s3://$SourceBucket/
 cd ..
@@ -45,6 +46,8 @@ CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
 --comment "Deploy new code." \
 --instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
 --parameters commands=["sudo stop uwsgi",\
+"sudo rm /photos/Deploy/app.ini",\
+"sudo aws s3 cp s3://$SourceBucket/app.ini /photos/Deploy/app.ini",\
 "sudo rm /photos/FlaskApp/application.py",\
 "sudo aws s3 cp s3://$SourceBucket/application.py /photos/FlaskApp/application.py",\
 "sudo rm /photos/FlaskApp/templates/main.html",\
