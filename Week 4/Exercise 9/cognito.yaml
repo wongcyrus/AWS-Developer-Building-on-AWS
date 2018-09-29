@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Building on AWS Cognito Stack.
+Description: 'Building on AWS Cognito Stack
   Modified https://github.com/rosberglinhares/CloudFormationCognitoCustomResources'
 Parameters:
   LogoutURL:

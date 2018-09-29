@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Building on AWS Cloud9 Stack.
+Description: Building on AWS Cloud9 Stack
 Parameters:
   PublicSubnet1:
     Type: AWS::EC2::Subnet::Id
