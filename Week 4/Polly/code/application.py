@@ -304,7 +304,7 @@ def verify(token, access_token=None):
 
 @application.route("/members_voice")
 @flask_login.login_required
-def members_voice():
+def members_voice(filename=None):
     """A polly synthesized voice"""
     polly = boto3.client("polly")
     message = "hello %s welcome back" % flask_login.current_user.nickname
