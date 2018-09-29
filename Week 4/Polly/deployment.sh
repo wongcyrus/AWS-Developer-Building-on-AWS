@@ -45,12 +45,19 @@ InstanceIdWebServer1=$(aws ec2 describe-instances --filters "Name=tag:Name,Value
 InstanceIdWebServer2=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer2" \
 --query 'Reservations[0].Instances[0].InstanceId' --output text)
 CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
---comment "Update code" \
+--comment "Deploy new code." \
 --instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
---parameters commands="service --status-all" \
+--parameters commands=["sudo stop uwsgi", \
+"sudo rm /photos/FlaskApp/application.py", \
+"sudo aws s3 cp s3://$SourceBucket/application.py /photos/FlaskApp/application.py", \
+"sudo rm /photos/FlaskApp/templates/main.html", \
+"sudo aws s3 cp s3://$SourceBucket/main.html /photos/FlaskApp/main.html", \
+"sudo start uwsgi"] \
 --region $AWS_DEFAULT_REGION \
 --output text --query "Command.CommandId")
-sleep 10
+
+while [ "$(aws ssm list-command-invocations --command-id "CommandId" --query "CommandInvocations[].Status" --output text)" == "InProgress" ]; do sleep 1; done
+
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
 
