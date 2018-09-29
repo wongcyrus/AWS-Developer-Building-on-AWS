@@ -93,7 +93,6 @@ Resources:
         - image/jpeg
         - image/gif
         - image/bmp
-        - application/octet-stream
 
   Resource:
     Type: 'AWS::ApiGateway::Resource'

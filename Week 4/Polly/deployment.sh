@@ -2,14 +2,6 @@ export AWS_DEFAULT_REGION=us-east-1
 AWSAccountId=$(aws sts get-caller-identity --query 'Account' --output text)
 SourceBucket=sourcebucket$AWSAccountId
 
-aws s3api create-bucket --bucket $SourceBucket
-sleep 5
-
-cd code
-aws s3 cp application.py s3://$SourceBucket/
-aws s3 cp main.html s3://$SourceBucket/
-cd ..
-
 cp ../../Week\ 1/Exercise\ 3/vpc.yaml .
 cp ../../Week\ 2/Exercise\ 5/iam.yaml .
 cp ../../Week\ 4/Exercise\ 9/cdn.yaml .
@@ -30,6 +22,11 @@ rm db.yaml
 rm parameters.yaml
 rm web.yaml
 
+cd code
+aws s3 cp application.py s3://$SourceBucket/
+aws s3 cp main.html s3://$SourceBucket/
+cd ..
+
 aws cloudformation update-stack --stack-name edx-project-stack \
 --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
@@ -47,16 +44,16 @@ InstanceIdWebServer2=$(aws ec2 describe-instances --filters "Name=tag:Name,Value
 CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
 --comment "Deploy new code." \
 --instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
---parameters commands=["sudo stop uwsgi", \
-"sudo rm /photos/FlaskApp/application.py", \
-"sudo aws s3 cp s3://$SourceBucket/application.py /photos/FlaskApp/application.py", \
-"sudo rm /photos/FlaskApp/templates/main.html", \
-"sudo aws s3 cp s3://$SourceBucket/main.html /photos/FlaskApp/main.html", \
+--parameters commands=["sudo stop uwsgi",\
+"sudo rm /photos/FlaskApp/application.py",\
+"sudo aws s3 cp s3://$SourceBucket/application.py /photos/FlaskApp/application.py",\
+"sudo rm /photos/FlaskApp/templates/main.html",\
+"sudo aws s3 cp s3://$SourceBucket/main.html /photos/FlaskApp/templates/main.html",\
 "sudo start uwsgi"] \
 --region $AWS_DEFAULT_REGION \
 --output text --query "Command.CommandId")
 
-while [ "$(aws ssm list-command-invocations --command-id "CommandId" --query "CommandInvocations[].Status" --output text)" == "InProgress" ]; do sleep 1; done
+sleep 5
 
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
