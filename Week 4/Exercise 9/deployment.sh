@@ -9,7 +9,7 @@ wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercis
 unzip -o ex-cognito.zip
 rm ex-cognito.zip
 yes | cp -f code/config.py exercise-cognito/FlaskApp/
-yes | cp -f code/database_create_tables.py exercise-cognito/Deploy/
+yes | cp -f ../../Week\ 3/Exercise\ 8/code/database_create_tables.py exercise-cognito/Deploy/
 yes | cp -f code/nginx.config exercise-cognito/Deploy/
 yes | cp -f code/app.ini exercise-cognito/Deploy/
 cd exercise-cognito
