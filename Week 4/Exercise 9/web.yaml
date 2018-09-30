@@ -67,27 +67,29 @@ Resources:
                   - /etc/cfn/cfn-hup.conf
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
         Configure:
+          sources: 
+              /photos: !Sub "s3://$bucket/deploy-app.zip"
           commands:
+            update_yum_packages: |
+              yum update -y
             set_source_bucket:
               command: !Sub |
                 export bucket=${SourceBucket}
             deploy:
               command: !Sub |
                 pip-3.6 install uwsgi
-                
-                # download and setup our application
-                mkdir /photos
-                cd /photos
-                aws s3 cp s3://$bucket/deploy-app.zip .
-                unzip deploy-app.zip
                 pip-3.6 install -r FlaskApp/requirements.txt
                 # copy in the nginx config
                 mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
                 # configure upstart to run uwsgi
                 mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+              cwd: "/photos"
+              ignoreErrors: "false"   
             create_db:
               command: !Sub |  
-                python3 Deploy/database_create_tables.py
+                python3 database_create_tables.py
+              cwd: "/photos/Deploy"
+              ignoreErrors: "false"          
             start_uwsgi:
               command: !Sub |
                 start uwsgi
@@ -108,7 +110,7 @@ Resources:
           GroupSet: 
             - Ref: WebSecurityGroup
           SubnetId: 
-            Ref: PrivateSubnet1
+            Ref: PrivateSubnet2
       Tags:
         -
           Key: Name
@@ -116,7 +118,6 @@ Resources:
       UserData:
         'Fn::Base64': !Sub |
           #!/bin/bash -ex
-          yum update -y
           yum update -y aws-cfn-bootstrap
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndRun --region ${AWS::Region}
           # Signal the status from cfn-init (via $?)
