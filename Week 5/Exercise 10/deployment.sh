@@ -36,12 +36,6 @@ aws s3 cp deploy-app.zip s3://$SourceBucket/
 cd ..
 rm -rf exercise-xray
 
-cd code
-aws s3 cp app.ini s3://$SourceBucket/
-aws s3 cp application.py s3://$SourceBucket/
-aws s3 cp main.html s3://$SourceBucket/
-cd ..
-
 aws cloudformation update-stack --stack-name edx-project-stack \
 --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
@@ -52,30 +46,4 @@ aws cloudformation update-stack --stack-name edx-project-stack \
                 
 aws cloudformation wait stack-update-complete --stack-name edx-project-stack
 
-InstanceIdWebServer1=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer1" \
---query 'Reservations[0].Instances[0].InstanceId' --output text)
-InstanceIdWebServer2=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer2" \
---query 'Reservations[0].Instances[0].InstanceId' --output text)
-CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
---comment "Deploy new code." \
---instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
---parameters commands=["sudo stop uwsgi",\
-"sudo rm /photos/Deploy/app.ini",\
-"sudo aws s3 cp s3://$SourceBucket/app.ini /photos/Deploy/app.ini",\
-"sudo rm /photos/FlaskApp/application.py",\
-"sudo aws s3 cp s3://$SourceBucket/application.py /photos/FlaskApp/application.py",\
-"sudo rm /photos/FlaskApp/templates/main.html",\
-"sudo aws s3 cp s3://$SourceBucket/main.html /photos/FlaskApp/templates/main.html",\
-"sudo start uwsgi"] \
---region $AWS_DEFAULT_REGION \
---output text --query "Command.CommandId")
 
-sleep 5
-
-aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
-aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
-
-pip install awscli --upgrade --user
-curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o "session-manager-plugin.rpm"
-sudo yum install -y session-manager-plugin.rpm
-rm session-manager-plugin.rpm
