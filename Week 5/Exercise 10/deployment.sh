@@ -28,7 +28,7 @@ unzip -o ex-xray.zip
 rm ex-xray.zip
 yes | cp -f ../../Week\ 4/Exercise\ 9/code/config.py exercise-xray/FlaskApp/
 yes | cp -f ../../Week\ 3/Exercise\ 8/code/database_create_tables.py exercise-xray/Deploy/
-yes | cp -f ../../Week\ 4/Exercise\ 9/code/nginx.config exercise-xray/Deploy/
+yes | cp -f ../../Week\ 4/Exercise\ 9/code/nginx.conf exercise-xray/Deploy/
 yes | cp -f ../../Week\ 4/Polly/code/app.ini exercise-xray/Deploy/
 cd exercise-xray
 zip -ro deploy-app.zip Deploy/ FlaskApp/
