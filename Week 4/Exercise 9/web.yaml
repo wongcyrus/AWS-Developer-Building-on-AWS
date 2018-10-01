@@ -32,9 +32,9 @@ Resources:
           roleName: !Ref WebServerRole
       AWS::CloudFormation::Init:
         configSets:
-          InstallAndRun:
+          InstallAndDeploy:
             - Install
-            - Configure
+            - Deploy
         Install:      
           packages:
             yum:
@@ -58,8 +58,8 @@ Resources:
               content: !Sub |
                 [cfn-auto-reloader-hook]
                 triggers=post.update
-                path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndRun --region ${AWS::Region}
+                path=Resources.WebInstance1.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndDeploy --region ${AWS::Region}
                 runas=root
               mode: '000400'
               owner: root
@@ -76,36 +76,36 @@ Resources:
                 files:
                   - /etc/cfn/cfn-hup.conf
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
-        Configure:
+          commands:
+            01_unblock_nginx:
+              command: chkconfig nginx on
+            02_install_xray:
+              command: |
+                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
+              cwd: "/tmp"
+              ignoreErrors: "false" 
+        Deploy:
           commands:
             01_pip_uwsgi:
-              command: !Sub |
-                pip-3.6 install uwsgi
+              command: pip-3.6 install uwsgi
               cwd: "/photos"
               ignoreErrors: "false"
             02_pip_flask_app_requirements:
-              command: !Sub |
-                pip-3.6 install -r requirements.txt
+              command: pip-3.6 install -r requirements.txt
               cwd: "/photos/FlaskApp"
               ignoreErrors: "false"     
             03_copy_config:
-              command: !Sub |
-                mv -f nginx.conf /etc/nginx/nginx.conf && mv -f uwsgi.conf /etc/init/uwsgi.conf
+              command: mv -f nginx.conf /etc/nginx/nginx.conf && mv -f uwsgi.conf /etc/init/uwsgi.conf
               cwd: "/photos/Deploy"
               ignoreErrors: "false"               
             04_create_database:
-              command: !Sub |  
-                python3 database_create_tables.py
+              command: python3 database_create_tables.py
               cwd: "/photos/Deploy"
               ignoreErrors: "false"          
-            05_start_web:
-              command: !Sub |
-                start uwsgi && chkconfig nginx on && service nginx restart
-            06_x_ray:
-              command: !Sub |
-                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /home/ec2-user/xray.rpm
-              cwd: "/tmp"
-              ignoreErrors: "false" 
+            05_start_uwsgi:
+              command: start uwsgi
+            06_restart_nginx:
+              command: service nginx restart
     Properties: 
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
@@ -125,7 +125,7 @@ Resources:
         'Fn::Base64': !Sub |
           #!/bin/bash -ex
           yum update -y
-          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndRun --region ${AWS::Region}
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndDeploy --region ${AWS::Region}
           # Signal the status from cfn-init (via $?)
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WebInstance1 --region ${AWS::Region}
     CreationPolicy:
