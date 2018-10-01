@@ -84,7 +84,7 @@ Resources:
               command: |
                 curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
               cwd: "/tmp"
-              ignoreErrors: "false" 
+              ignoreErrors: "true" 
         Deploy:
           commands:
             01_pip_uwsgi:
@@ -97,6 +97,7 @@ Resources:
               ignoreErrors: "false" 
             03_stop_uwsgi:
               command: stop uwsgi
+              ignoreErrors: "true" 
             04_stop_nginx:
               command: service nginx stop         
             05_copy_config:
@@ -200,7 +201,7 @@ Resources:
               command: |
                 curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
               cwd: "/tmp"
-              ignoreErrors: "false" 
+              ignoreErrors: "true" 
         Deploy:
           commands:
             01_pip_uwsgi:
@@ -213,6 +214,7 @@ Resources:
               ignoreErrors: "false" 
             03_stop_uwsgi:
               command: stop uwsgi
+              ignoreErrors: "true" 
             04_stop_nginx:
               command: service nginx stop         
             05_copy_config:
