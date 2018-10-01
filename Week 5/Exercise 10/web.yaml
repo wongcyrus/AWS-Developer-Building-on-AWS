@@ -80,6 +80,11 @@ Resources:
           commands:
             01_unblock_nginx:
               command: chkconfig nginx on
+            02_install_xray:
+              command: |
+                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
+              cwd: "/tmp"
+              ignoreErrors: "false" 
         Deploy:
           commands:
             01_pip_uwsgi:
@@ -102,7 +107,10 @@ Resources:
               command: start uwsgi
             06_restart_nginx:
               command: service nginx restart
-    Properties: 
+            07_test:
+              command: touch test.txt
+              cwd: "/photos"
+    Properties:  
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
       IamInstanceProfile: !Ref WebServerInstanceProfile
@@ -187,6 +195,11 @@ Resources:
           commands:
             01_unblock_nginx:
               command: chkconfig nginx on
+            02_install_xray:
+              command: |
+                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
+              cwd: "/tmp"
+              ignoreErrors: "false" 
         Deploy:
           commands:
             01_pip_uwsgi:
@@ -209,6 +222,9 @@ Resources:
               command: start uwsgi
             06_restart_nginx:
               command: service nginx restart
+            07_test:
+              command: touch test.txt
+              cwd: "/photos"  
     Properties: 
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro

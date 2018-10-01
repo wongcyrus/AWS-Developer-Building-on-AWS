@@ -10,7 +10,6 @@ cp ../../Week\ 4/Exercise\ 9/cloud9.yaml .
 cp ../../Week\ 4/Exercise\ 9/cognito.yaml .
 cp ../../Week\ 4/Exercise\ 9/db.yaml .
 cp ../../Week\ 4/Exercise\ 9/parameters.yaml .
-cp ../../Week\ 4/Exercise\ 9/web.yaml .
 aws s3 sync . s3://$SourceBucket 
 rm vpc.yaml
 rm iam.yaml
@@ -20,8 +19,6 @@ rm cloud9.yaml
 rm cognito.yaml
 rm db.yaml
 rm parameters.yaml
-rm web.yaml
-
 
 wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercises/ex-xray.zip
 unzip -o ex-xray.zip
