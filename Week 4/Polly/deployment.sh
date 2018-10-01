@@ -61,7 +61,3 @@ sleep 5
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
 
-pip install awscli --upgrade --user
-curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o "session-manager-plugin.rpm"
-sudo yum install -y session-manager-plugin.rpm
-rm session-manager-plugin.rpm
