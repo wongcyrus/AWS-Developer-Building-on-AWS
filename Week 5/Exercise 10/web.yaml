@@ -94,22 +94,23 @@ Resources:
             02_pip_flask_app_requirements:
               command: pip-3.6 install -r requirements.txt
               cwd: "/photos/FlaskApp"
-              ignoreErrors: "false"     
-            03_copy_config:
+              ignoreErrors: "false" 
+            03_stop_uwsgi:
+              command: stop uwsgi
+            04_stop_nginx:
+              command: service nginx stop         
+            05_copy_config:
               command: mv -f nginx.conf /etc/nginx/nginx.conf && mv -f uwsgi.conf /etc/init/uwsgi.conf
               cwd: "/photos/Deploy"
               ignoreErrors: "false"               
-            04_create_database:
+            06_create_database:
               command: python3 database_create_tables.py
               cwd: "/photos/Deploy"
               ignoreErrors: "false"          
-            05_start_uwsgi:
+            07_start_uwsgi:
               command: start uwsgi
-            06_restart_nginx:
-              command: service nginx restart
-            07_test:
-              command: touch test.txt
-              cwd: "/photos"
+            07_restart_nginx:
+              command: service nginx start
     Properties:  
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
@@ -209,22 +210,23 @@ Resources:
             02_pip_flask_app_requirements:
               command: pip-3.6 install -r requirements.txt
               cwd: "/photos/FlaskApp"
-              ignoreErrors: "false"     
-            03_copy_config:
+              ignoreErrors: "false" 
+            03_stop_uwsgi:
+              command: stop uwsgi
+            04_stop_nginx:
+              command: service nginx stop         
+            05_copy_config:
               command: mv -f nginx.conf /etc/nginx/nginx.conf && mv -f uwsgi.conf /etc/init/uwsgi.conf
               cwd: "/photos/Deploy"
               ignoreErrors: "false"               
-            04_create_database:
+            06_create_database:
               command: python3 database_create_tables.py
               cwd: "/photos/Deploy"
               ignoreErrors: "false"          
-            05_start_uwsgi:
+            07_start_uwsgi:
               command: start uwsgi
-            06_restart_nginx:
-              command: service nginx restart
-            07_test:
-              command: touch test.txt
-              cwd: "/photos"  
+            07_restart_nginx:
+              command: service nginx start
     Properties: 
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
