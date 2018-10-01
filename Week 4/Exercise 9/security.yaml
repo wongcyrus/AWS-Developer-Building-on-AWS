@@ -84,6 +84,9 @@ Outputs:
   WebServerInstanceProfile:
     Value: !Ref WebServerInstanceProfile
     Description: Web Server Instance Profile
+  WebServerRole:
+    Value: !Ref WebServerRole
+    Description: Web Server Role
   WebSecurityGroup:
     Value: !GetAtt WebSecurityGroup.GroupId
     Description: WebSecurityGroup

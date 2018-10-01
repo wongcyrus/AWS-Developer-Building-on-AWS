@@ -11,6 +11,8 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   WebServerInstanceProfile:
     Type: String
+  WebServerRole:
+    Type: String
   WebSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
   LoadBalancerArn:
@@ -22,6 +24,12 @@ Resources:
   WebInstance1: 
     Type: AWS::EC2::Instance
     Metadata:
+      AWS::CloudFormation::Authentication: 
+        rolebased: 
+          type: "S3"
+          buckets: 
+            - !Ref SourceBucket
+          roleName: !Ref WebServerRole
       AWS::CloudFormation::Init:
         configSets:
           InstallAndRun:
@@ -49,7 +57,7 @@ Resources:
                 [cfn-auto-reloader-hook]
                 triggers=post.update
                 path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance --configsets InstallAndRun --region ${AWS::Region}
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndRun --region ${AWS::Region}
                 runas=root
               mode: '000400'
               owner: root
@@ -68,38 +76,29 @@ Resources:
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
         Configure:
           sources: 
-              /photos: !Sub "s3://$bucket/deploy-app.zip"
+              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           commands:
-            update_yum_packages: |
-              yum update -y
-            set_source_bucket:
+            pip:
               command: !Sub |
-                export bucket=${SourceBucket}
-            deploy:
-              command: !Sub |
-                pip-3.6 install uwsgi
-                pip-3.6 install -r FlaskApp/requirements.txt
-                # copy in the nginx config
-                mv -f Deploy/nginx.conf /etc/nginx/nginx.conf
-                # configure upstart to run uwsgi
-                mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+                pip-3.6 install uwsgi && pip-3.6 install -r FlaskApp/requirements.txt
               cwd: "/photos"
-              ignoreErrors: "false"   
+              ignoreErrors: "false"
+            copy_config:
+              command: !Sub |
+                mv -f Deploy/nginx.conf /etc/nginx/nginx.conf && mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
+              cwd: "/photos"
+              ignoreErrors: "false"               
             create_db:
               command: !Sub |  
                 python3 database_create_tables.py
               cwd: "/photos/Deploy"
               ignoreErrors: "false"          
-            start_uwsgi:
+            start_web:
               command: !Sub |
-                start uwsgi
-                # switch on nginx and configure to autostart
-                chkconfig nginx on
-                service nginx restart
+                start uwsgi && chkconfig nginx on && service nginx restart
             x_ray:
               command: !Sub |
-                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /home/ec2-user/xray.rpm
-                yum install -y /home/ec2-user/xray.rpm
+                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /home/ec2-user/xray.rpm && yum install -y /home/ec2-user/xray.rpm
     Properties: 
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
@@ -118,7 +117,7 @@ Resources:
       UserData:
         'Fn::Base64': !Sub |
           #!/bin/bash -ex
-          yum update -y aws-cfn-bootstrap
+          yum update -y
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndRun --region ${AWS::Region}
           # Signal the status from cfn-init (via $?)
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WebInstance1 --region ${AWS::Region}

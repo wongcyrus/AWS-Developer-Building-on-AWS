@@ -13,6 +13,7 @@ import mysql.connector
 
 import requests
 import os
+import sys
 
 r = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document")
 response_json = r.json()
@@ -92,3 +93,4 @@ def populate():
 
 
 populate()
+sys.exit(0)
