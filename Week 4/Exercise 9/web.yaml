@@ -42,6 +42,8 @@ Resources:
               python36-devel: []
               nginx: []
               gcc: []
+          sources: 
+              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           files:
             /etc/cfn/cfn-hup.conf:
               content: !Sub |
@@ -75,35 +77,35 @@ Resources:
                   - /etc/cfn/cfn-hup.conf
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
         Configure:
-          sources: 
-              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           commands:
-            pip_uwsgi:
+            01_pip_uwsgi:
               command: !Sub |
                 pip-3.6 install uwsgi
               cwd: "/photos"
               ignoreErrors: "false"
-            pip_flask:
+            02_pip_flask_app_requirements:
               command: !Sub |
                 pip-3.6 install -r requirements.txt
               cwd: "/photos/FlaskApp"
-              ignoreErrors: "false"              
-            copy_config:
+              ignoreErrors: "false"     
+            03_copy_config:
               command: !Sub |
-                mv -f Deploy/nginx.conf /etc/nginx/nginx.conf && mv -f Deploy/uwsgi.conf /etc/init/uwsgi.conf
-              cwd: "/photos"
+                mv -f nginx.conf /etc/nginx/nginx.conf && mv -f uwsgi.conf /etc/init/uwsgi.conf
+              cwd: "/photos/Deploy"
               ignoreErrors: "false"               
-            create_db:
+            04_create_database:
               command: !Sub |  
                 python3 database_create_tables.py
               cwd: "/photos/Deploy"
               ignoreErrors: "false"          
-            start_web:
+            05_start_web:
               command: !Sub |
                 start uwsgi && chkconfig nginx on && service nginx restart
-            x_ray:
+            06_x_ray:
               command: !Sub |
-                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /home/ec2-user/xray.rpm && yum install -y /home/ec2-user/xray.rpm
+                curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /home/ec2-user/xray.rpm
+              cwd: "/tmp"
+              ignoreErrors: "false" 
     Properties: 
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
@@ -114,7 +116,7 @@ Resources:
           GroupSet: 
             - Ref: WebSecurityGroup
           SubnetId: 
-            Ref: PrivateSubnet1
+            Ref: PrivateSubnet2
       Tags:
         -
           Key: Name
@@ -126,7 +128,10 @@ Resources:
           /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource WebInstance1 --configsets InstallAndRun --region ${AWS::Region}
           # Signal the status from cfn-init (via $?)
           /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource WebInstance1 --region ${AWS::Region}
-        
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT10M        
+
   WebInstance2: 
     Type: AWS::EC2::Instance
     Properties: 
