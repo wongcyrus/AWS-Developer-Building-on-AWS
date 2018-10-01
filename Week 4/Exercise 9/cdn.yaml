@@ -78,6 +78,7 @@ Resources:
     Path: "/"
     ManagedPolicyArns: 
      - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+     - "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
   
   Account: 
    Type: AWS::ApiGateway::Account
@@ -85,7 +86,7 @@ Resources:
     CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
       
   Api:
-    Type: 'AWS::ApiGateway::RestApi'
+    Type: AWS::ApiGateway::RestApi
     Properties:
       Name: WebProxyApi
       BinaryMediaTypes:
