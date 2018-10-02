@@ -31,7 +31,7 @@ Resources:
         - "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
       Policies: 
         - 
-          PolicyName: "ssm"
+          PolicyName: SystemsManagerParameters
           PolicyDocument: 
             Version: "2012-10-17"
             Statement: 
@@ -43,6 +43,19 @@ Resources:
               Effect: "Allow"
               Action: ssm:GetParameters
               Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/edx-*"  
+        - 
+          PolicyName: LogRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'logs:DescribeLogStreams'
+                Resource:
+                  - !Sub "arn:aws:logs::${AWS::Region}:*:*"
 
   WebServerInstanceProfile: 
     Type: AWS::IAM::InstanceProfile

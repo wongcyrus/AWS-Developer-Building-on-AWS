@@ -24,18 +24,24 @@ aws s3 sync . s3://$SourceBucket
 rm vpc.yaml
 rm iam.yaml
 
-random=$(shuf -i 2000-65000 -n 1)
+
 # aws cloudformation update-stack --stack-name edx-project-stack \
 # --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
+# --capabilities CAPABILITY_NAMED_IAM \
+# --parameters    ParameterKey=Password,UsePreviousValue=true \
+#                 ParameterKey=DBPassword,UsePreviousValue=true \
+#                 ParameterKey=SourceBucket,UsePreviousValue=true \
+#                 ParameterKey=AppDomain,UsePreviousValue=true
+# aws cloudformation wait stack-update-complete --stack-name edx-project-stack
+random=$(shuf -i 2000-65000 -n 1)
 aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters    ParameterKey=Password,ParameterValue=P@ssword \
                 ParameterKey=DBPassword,ParameterValue=Password \
                 ParameterKey=SourceBucket,ParameterValue=$SourceBucket \
                 ParameterKey=AppDomain,ParameterValue=uniqueedx$AWSAccountId$random
-                
-
 aws cloudformation wait stack-create-complete --stack-name edx-project-stack
+
 AWS_ACCESS_KEY_ID=$(aws cloudformation describe-stacks --stack-name edx-project-stack \
 --query 'Stacks[0].Outputs[?OutputKey==`AccessKey`].OutputValue' --output text)
 AWS_SECRET_ACCESS_KEY=$(aws cloudformation describe-stacks --stack-name edx-project-stack \

@@ -21,6 +21,11 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2
 Resources:
+  CloudFormationLogs:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      RetentionInDays: 7
+      
   WebInstance1: 
     Type: AWS::EC2::Instance
     Metadata:
@@ -34,6 +39,7 @@ Resources:
         configSets:
           InstallAndDeploy:
             - Install
+            - InstallLogs
             - Deploy
         Install:      
           packages:
@@ -42,8 +48,6 @@ Resources:
               python36-devel: []
               nginx: []
               gcc: []
-          sources: 
-              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           files:
             /etc/cfn/cfn-hup.conf:
               content: !Sub |
@@ -84,8 +88,86 @@ Resources:
               command: |
                 curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
               cwd: "/tmp"
-              ignoreErrors: "true" 
+              ignoreErrors: "true"               
+        InstallLogs:
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/awslogs/state/agent-state
+                [yum]
+                file = /var/log/yum.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} yum.log
+                [messages]
+                file = /var/log/messages
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} messages.log
+                [cfn-hup]
+                file = /var/log/cfn-hup.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cfn-hup.log
+                [cfn-init]
+                file = /var/log/cfn-init.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cfn-init.log
+                [cfn-init-cmd]
+                file = /var/log/cfn-init-cmd.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cfn-init-cmd.log
+                [cloud-init]
+                file = /var/log/cloud-init.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cloud-init.log
+                [cloud-init-output]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cloud-init.log
+                [handler]
+                file = /var/log/handler.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} handler.log
+                
+                [uwsgi]
+                file = /var/log/uwsgi.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} uwsgi.log     
+                [nginx_access]
+                file = /var/log/nginx/access.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} nginx_access.log   
+                [nginx_error]
+                file = /var/log/nginx/error.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} nginx_error.log    
+              group: "root"
+              owner: "root"
+              mode: "000400"
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000444'
+              owner: root
+              group: root
+          commands:
+            01_create_state_directory:
+              command: mkdir -p /var/awslogs/state
+          services:
+            sysvinit:
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                  - /etc/awslogs/awslogs.conf
         Deploy:
+          sources: 
+              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           commands:
             01_pip_uwsgi:
               command: pip-3.6 install uwsgi
@@ -110,9 +192,9 @@ Resources:
               ignoreErrors: "false"          
             07_start_uwsgi:
               command: start uwsgi
-            07_restart_nginx:
+            08_restart_nginx:
               command: service nginx start
-    Properties:  
+    Properties: 
       ImageId: !Ref LatestAmiId
       InstanceType: t3.micro
       IamInstanceProfile: !Ref WebServerInstanceProfile
@@ -151,6 +233,7 @@ Resources:
         configSets:
           InstallAndDeploy:
             - Install
+            - InstallLogs
             - Deploy
         Install:      
           packages:
@@ -159,8 +242,6 @@ Resources:
               python36-devel: []
               nginx: []
               gcc: []
-          sources: 
-              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           files:
             /etc/cfn/cfn-hup.conf:
               content: !Sub |
@@ -201,8 +282,86 @@ Resources:
               command: |
                 curl https://s3.dualstack.us-east-2.amazonaws.com/aws-xray-assets.us-east-2/xray-daemon/aws-xray-daemon-3.x.rpm -o /tmp/xray.rpm && yum install -y /tmp/xray.rpm
               cwd: "/tmp"
-              ignoreErrors: "true" 
+              ignoreErrors: "true"               
+        InstallLogs:
+          packages:
+            yum:
+              awslogs: []
+          files:
+            /etc/awslogs/awslogs.conf:
+              content: !Sub |
+                [general]
+                state_file= /var/awslogs/state/agent-state
+                [yum]
+                file = /var/log/yum.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} yum.log
+                [messages]
+                file = /var/log/messages
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} messages.log
+                [cfn-hup]
+                file = /var/log/cfn-hup.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cfn-hup.log
+                [cfn-init]
+                file = /var/log/cfn-init.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cfn-init.log
+                [cfn-init-cmd]
+                file = /var/log/cfn-init-cmd.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cfn-init-cmd.log
+                [cloud-init]
+                file = /var/log/cloud-init.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cloud-init.log
+                [cloud-init-output]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} cloud-init.log
+                [handler]
+                file = /var/log/handler.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} handler.log
+                
+                [uwsgi]
+                file = /var/log/uwsgi.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} uwsgi.log     
+                [nginx_access]
+                file = /var/log/nginx/access.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} nginx_access.log   
+                [nginx_error]
+                file = /var/log/nginx/error.log
+                log_group_name = ${CloudFormationLogs}
+                log_stream_name = {hostname} - {instance_id} nginx_error.log
+              group: "root"
+              owner: "root"
+              mode: "000400"
+            /etc/awslogs/awscli.conf:
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+                [default]
+                region = ${AWS::Region}
+              mode: '000444'
+              owner: root
+              group: root
+          commands:
+            01_create_state_directory:
+              command: mkdir -p /var/awslogs/state
+          services:
+            sysvinit:
+              awslogs:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                  - /etc/awslogs/awslogs.conf
         Deploy:
+          sources: 
+              /photos: !Sub "https://s3.amazonaws.com/${SourceBucket}/deploy-app.zip"
           commands:
             01_pip_uwsgi:
               command: pip-3.6 install uwsgi
@@ -227,7 +386,7 @@ Resources:
               ignoreErrors: "false"          
             07_start_uwsgi:
               command: start uwsgi
-            07_restart_nginx:
+            08_restart_nginx:
               command: service nginx start
     Properties: 
       ImageId: !Ref LatestAmiId
