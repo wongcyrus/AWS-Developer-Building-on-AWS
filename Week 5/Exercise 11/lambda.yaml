@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: Building on AWS Lambda Stack
+Parameters:
+  SourceBucket:
+    Type: String
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id 
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  MyDBEndpoint:
+    Type: String
+  ImageS3Bucket:
+    Type: String
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: RDS Password.
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters.    
+Resources:
+  LabelLambda: 
+    Type: "AWS::Lambda::Function"
+    Properties: 
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref SourceBucket
+        S3Key: lambda.zip
+      Runtime: python3.6
+      Timeout: 60
+      TracingConfig:
+        Mode: "Active"
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+      Environment:
+        Variables:
+          DATABASE_HOST: !Ref MyDBEndpoint
+          DATABASE_USER: web_user
+          DATABASE_PASSWORD: !Ref DBPassword
+          DATABASE_DB_NAME: Photos
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        - "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+            
+  ImageS3BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref LabelLambda
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::${ImageS3Bucket}"            
