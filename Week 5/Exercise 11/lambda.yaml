@@ -11,8 +11,6 @@ Parameters:
     Type: AWS::EC2::SecurityGroup::Id
   MyDBEndpoint:
     Type: String
-  ImageS3Bucket:
-    Type: String
   DBPassword:
     NoEcho: 'true'
     Type: String
@@ -21,7 +19,25 @@ Parameters:
     MaxLength: '41'
     ConstraintDescription: the password must be between 1 and 41 characters.    
 Resources:
-  LabelLambda: 
+  ImageS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'imagebucket${AWS::AccountId}'
+      NotificationConfiguration:
+        LambdaConfigurations:
+        - Event: 's3:ObjectCreated:*'
+          Function: !GetAtt LabelsLambda.Arn
+          
+  ImageS3BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref LabelsLambda
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::${ImageS3Bucket}"     
+      
+  LabelsLambda: 
     Type: "AWS::Lambda::Function"
     Properties: 
       Handler: lambda_function.lambda_handler
@@ -72,12 +88,8 @@ Resources:
             Action:
             - logs:*
             Resource: arn:aws:logs:*:*:*
-            
-  ImageS3BucketPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !Ref LabelLambda
-      Principal: s3.amazonaws.com
-      SourceAccount: !Ref "AWS::AccountId"
-      SourceArn: !Sub "arn:aws:s3:::${ImageS3Bucket}"            
+
+Outputs:
+  ImageS3Bucket:
+    Value: !Ref ImageS3Bucket
+    Description: Image S3 Bucket
