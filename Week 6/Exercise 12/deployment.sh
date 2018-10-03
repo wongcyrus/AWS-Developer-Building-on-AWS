@@ -28,10 +28,10 @@ rm security.yaml
 wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercises/ex-sns-sqs.zip
 unzip -o ex-sns-sqs.zip
 rm ex-sns-sqs.zip
-yes | cp -f ../../Week\ 4/Exercise\ 9/code/config.py exercise-lambda/FlaskApp/
-yes | cp -f ../../Week\ 3/Exercise\ 8/code/database_create_tables.py exercise-lambda/Deploy/
-yes | cp -f ../../Week\ 4/Exercise\ 9/code/nginx.conf exercise-lambda/Deploy/
-yes | cp -f ../../Week\ 4/Polly/code/app.ini exercise-lambda/Deploy/
+yes | cp -f ../../Week\ 4/Exercise\ 9/code/config.py exercise-sns-sqs/FlaskApp/
+yes | cp -f ../../Week\ 3/Exercise\ 8/code/database_create_tables.py exercise-sns-sqs/Deploy/
+yes | cp -f ../../Week\ 4/Exercise\ 9/code/nginx.conf exercise-sns-sqs/Deploy/
+yes | cp -f ../../Week\ 4/Polly/code/app.ini exercise-sns-sqs/Deploy/
 cd exercise-sns-sqs
 zip -ro deploy-app.zip Deploy/ FlaskApp/
 aws s3 cp deploy-app.zip s3://$SourceBucket/
@@ -54,14 +54,14 @@ rm -rf exercise-sns-sqs
 
 
 ## For Stack update for previous exercise.
-aws cloudformation update-stack --stack-name edx-project-stack \
---template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
---capabilities CAPABILITY_NAMED_IAM \
---parameters    ParameterKey=Password,UsePreviousValue=true \
-                ParameterKey=DBPassword,UsePreviousValue=true \
-                ParameterKey=SourceBucket,UsePreviousValue=true \
-                ParameterKey=AppDomain,UsePreviousValue=true
-aws cloudformation wait stack-update-complete --stack-name edx-project-stack
+# aws cloudformation update-stack --stack-name edx-project-stack \
+# --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
+# --capabilities CAPABILITY_NAMED_IAM \
+# --parameters    ParameterKey=Password,UsePreviousValue=true \
+#                 ParameterKey=DBPassword,UsePreviousValue=true \
+#                 ParameterKey=SourceBucket,UsePreviousValue=true \
+#                 ParameterKey=AppDomain,UsePreviousValue=true
+# aws cloudformation wait stack-update-complete --stack-name edx-project-stack
 
 InstanceIdWebServer1=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer1" \
 --query 'Reservations[0].Instances[0].InstanceId' --output text)
@@ -71,8 +71,8 @@ CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
 --comment "Deploy new code." \
 --instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
 --parameters commands=["sudo stop uwsgi",\
-"rm -rf /photos",\
-"mkdir /photos",\
+"sudo rm -rf /photos",\
+"sudo mkdir /photos",\
 "cd /photos",\
 "sudo aws s3 cp s3://$SourceBucket/deploy-app.zip .",\
 "sudo unzip deploy-app.zip",\
