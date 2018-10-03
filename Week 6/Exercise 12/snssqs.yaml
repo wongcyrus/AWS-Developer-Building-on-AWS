@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: Building on AWS Lambda Stack
+Parameters:
+  SourceBucket:
+    Type: String
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id 
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id 
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  MyDBEndpoint:
+    Type: String
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: RDS Password.
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters.    
+Resources:
+
+  UploadSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: uploads-topic
+      Subscription:
+      - 
+        Endpoint:
+          Fn::GetAtt:
+          - UploadQueue
+          - Arn
+        Protocol: sqs
+      - 
+        Endpoint:
+        Fn::GetAtt:
+        - LabelsLambda
+        - Arn
+        Protocol: lambda
+  
+  UploadTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument: 
+        Version: '2012-10-17'
+        Id: QueuePolicy
+        Statement:
+        - Sid: Allow-S3-Publish
+          Effect: Allow
+          Principal:
+            AWS: "*"
+          Action: SNS:Publish
+          Resource: !Ref UploadSNSTopic
+          Condition:
+            ArnLike:
+              aws:SourceArn: 
+                Fn::Join:
+                   - ""
+                   - 
+                     - "arn:aws:s3:::"  
+                     - !Sub 'imagebucketsns${AWS::AccountId}'
+      Topics:
+        - 
+          !Ref UploadSNSTopic
+
+  UploadQueue:
+    Type: AWS::SQS::Queue
+    Properties:    
+      QueueName: uploads-queue
+      
+  QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: QueuePolicy
+        Statement:
+        - Sid: Allow-SendMessage-To-Queues-From-SNS-Topic
+          Effect: Allow
+          Principal: "*"
+          Action:
+          - sqs:SendMessage
+          Resource: "*"
+          Condition:
+            ArnEquals:
+              aws:SourceArn: !Ref UploadSNSTopic      
+
+  ImageS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'imagebucketsns${AWS::AccountId}'
+      NotificationConfiguration:
+        TopicConfigurations:
+        - 
+          Event: 's3:ObjectCreated:*'
+          Topic: !Ref UploadSNSTopic
+
+  ImageS3BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt LabelsLambda.Arn
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref Topic
+
+  LabelsLambda: 
+    Type: AWS::Lambda::Function
+    Properties: 
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: 
+        S3Bucket: !Ref SourceBucket
+        S3Key: lambda.zip
+      Runtime: python3.6
+      Timeout: 120
+      TracingConfig:
+        Mode: "Active"
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+      Environment:
+        Variables:
+          DATABASE_HOST: !Ref MyDBEndpoint
+          DATABASE_USER: web_user
+          DATABASE_PASSWORD: !Ref DBPassword
+          DATABASE_DB_NAME: Photos
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        - "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+
+Outputs:
+  ImageS3Bucket:
+    Value: !Ref ImageS3Bucket
+    Description: Image S3 Bucket
+  LabelsLambda:
+    Value: !Ref LabelsLambda
+    Description: Labels Lambda

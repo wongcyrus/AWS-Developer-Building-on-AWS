@@ -12,6 +12,8 @@ cp ../../Week\ 4/Exercise\ 9/cloud9.yaml .
 cp ../../Week\ 4/Exercise\ 9/cognito.yaml .
 cp ../../Week\ 4/Exercise\ 9/parameters.yaml .
 cp ../../Week\ 5/Exercise\ 10/web.yaml .
+cp ../../Week\ 5/Exercise\ 11/db.yaml .
+cp ../../Week\ 5/Exercise\ 11/security.yaml .
 aws s3 sync . s3://$SourceBucket 
 rm vpc.yaml
 rm iam.yaml
@@ -20,15 +22,17 @@ rm cloud9.yaml
 rm cognito.yaml
 rm parameters.yaml
 rm web.yaml
+rm db.yaml
+rm security.yaml
 
-wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercises/ex-lambda.zip
-unzip -o ex-lambda.zip
-rm ex-lambda.zip
+wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-ADG/v1.1.0/exercises/ex-sns-sqs.zip
+unzip -o ex-sns-sqs.zip
+rm ex-sns-sqs.zip
 yes | cp -f ../../Week\ 4/Exercise\ 9/code/config.py exercise-lambda/FlaskApp/
 yes | cp -f ../../Week\ 3/Exercise\ 8/code/database_create_tables.py exercise-lambda/Deploy/
 yes | cp -f ../../Week\ 4/Exercise\ 9/code/nginx.conf exercise-lambda/Deploy/
 yes | cp -f ../../Week\ 4/Polly/code/app.ini exercise-lambda/Deploy/
-cd exercise-lambda
+cd exercise-sns-sqs
 zip -ro deploy-app.zip Deploy/ FlaskApp/
 aws s3 cp deploy-app.zip s3://$SourceBucket/
 pip-3.6 install 'mysql_connector_python<8.1' -t LambdaImageLabels
@@ -47,7 +51,6 @@ rm -rf exercise-lambda
 #                 ParameterKey=AppDomain,ParameterValue=uniqueedx$AWSAccountId$random
 # aws cloudformation wait stack-create-complete --stack-name edx-project-stack
 
-## For Stack Update
 aws cloudformation update-stack --stack-name edx-project-stack \
 --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
@@ -75,3 +78,8 @@ CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
 sleep 5
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
+
+LabelsLambda=$(aws cloudformation describe-stacks --stack-name edx-vpc-stack \
+--query 'Stacks[0].Outputs[?OutputKey==`LabelsLambda`].OutputValue' --output text)
+
+

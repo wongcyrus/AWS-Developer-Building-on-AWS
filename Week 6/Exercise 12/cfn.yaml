@@ -1,0 +1,172 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: Building on AWS Stack
+Parameters:
+  SourceBucket:
+    Type: String
+    Description: Source Bucket with nested cloudformation template.
+  Password:
+    NoEcho: 'true'
+    Type: String
+    Description: New account.
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters.
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: RDS Password.
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters.
+  AppDomain:
+    Type: String
+    Description: Unique subdomain for cognito app.
+    AllowedPattern: ^[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?$
+    ConstraintDescription: Domain names can only contain lower-case letters, numbers, and hyphens.
+Resources:
+  IAMStack:  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/iam.yaml' 
+      TimeoutInMinutes: 5
+      Parameters: 
+        Password: !Ref Password
+
+  VPCStack:  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/vpc.yaml' 
+      TimeoutInMinutes: 5
+
+  SecurityStack:  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/security.yaml' 
+      TimeoutInMinutes: 5
+      Parameters:
+        EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+        EdxProjectCloud9Sg: !GetAtt Cloud9Stack.Outputs.EdxProjectCloud9Sg
+        
+  DBStack:  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/db.yaml' 
+      TimeoutInMinutes: 20
+      Parameters:
+        EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+        WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
+        EdxProjectCloud9Sg: !GetAtt Cloud9Stack.Outputs.EdxProjectCloud9Sg
+        LambdaSecurityGroup: !GetAtt SecurityStack.Outputs.LambdaSecurityGroup
+        PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
+        PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
+        DBPassword: !Ref DBPassword
+
+  WebStack:  
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ParametesStack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/web.yaml' 
+      TimeoutInMinutes: 10
+      Parameters:
+        SourceBucket: !Ref SourceBucket
+        EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+        PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
+        PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
+        WebServerInstanceProfile: !GetAtt SecurityStack.Outputs.WebServerInstanceProfile
+        WebServerRole: !GetAtt SecurityStack.Outputs.WebServerRole
+        WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
+        LoadBalancerArn: !GetAtt CDNStack.Outputs.LoadBalancerArn
+
+  CDNStack:  
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cdn.yaml' 
+      TimeoutInMinutes: 30
+      Parameters:
+        SourceBucket: !Ref SourceBucket
+        EC2VpcId: !GetAtt VPCStack.Outputs.VPC
+        PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
+        PublicSubnet2: !GetAtt VPCStack.Outputs.PublicSubnet2
+        WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
+        
+  ParametesStack:  
+    Type: AWS::CloudFormation::Stack
+    DependsOn: DBStack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/parameters.yaml' 
+      TimeoutInMinutes: 15
+      Parameters:
+        CognitoPoolId: !GetAtt CognitoStack.Outputs.CognitoUserPoolId
+        CognitoClientId: !GetAtt CognitoStack.Outputs.CognitoUserPoolClientId
+        CognitoClientSecret: !GetAtt CognitoStack.Outputs.ClientSecret
+        CognitoDomain: !Sub "${AppDomain}.auth.${AWS::Region}.amazoncognito.com"
+        BaseUrl: 
+          !Join
+          - ''
+          - - 'https://'
+            - !GetAtt CDNStack.Outputs.DomainName
+        ImageS3Bucket: !GetAtt LabelsLambdaStack.Outputs.ImageS3Bucket
+        DBPassword: !Ref DBPassword
+        MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint
+        
+  Cloud9Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cloud9.yaml' 
+      TimeoutInMinutes: 5
+      Parameters:
+        PublicSubnet1: !GetAtt VPCStack.Outputs.PublicSubnet1
+
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/cognito.yaml' 
+      TimeoutInMinutes: 5
+      Parameters:
+        LogoutURL: 
+          !Join
+          - ''
+          - - 'https://'
+            - !GetAtt CDNStack.Outputs.DomainName
+        CallbackURL:
+          !Join
+          - ''
+          - - 'https://'
+            - !GetAtt CDNStack.Outputs.DomainName
+            - '/callback'
+        AppDomain: !Ref AppDomain
+        
+  SNSSQSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/${SourceBucket}/snssqs.yaml' 
+      TimeoutInMinutes: 5
+      Parameters:
+        SourceBucket: !Ref SourceBucket
+        PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
+        PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
+        LambdaSecurityGroup: !GetAtt SecurityStack.Outputs.LambdaSecurityGroup
+        MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint
+        DBPassword: !Ref DBPassword
+   
+Outputs:
+  AccessKey:
+    Value: !GetAtt IAMStack.Outputs.AccessKey
+    Description: AWSAccessKeyId of new user.
+  SecretKey:
+    Value: !GetAtt IAMStack.Outputs.SecretKey
+    Description: AWSSecretKey of new user.
+  ImageS3Bucket:
+    Value: !GetAtt LabelsLambdaStack.Outputs.ImageS3Bucket
+    Description: Bucket to save images.
+  MyDBEndpoint:
+    Value: !GetAtt DBStack.Outputs.MyDBEndpoint
+    Description: MySQL RDS
+  DomainName:
+    Value: !GetAtt CDNStack.Outputs.DomainName
+    Description: Webpage CloudFront Domain name.
+  LabelsLambda:
+    Value: !GetAtt SNSSQSStack.Outputs.LabelsLambda
+    Description: Labels Lambda
