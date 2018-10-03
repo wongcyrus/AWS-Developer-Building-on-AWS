@@ -65,6 +65,8 @@ CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
 --comment "Deploy new code." \
 --instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
 --parameters commands=["sudo stop uwsgi",\
+"rm -rf /photos",\
+"mkdir /photos",\
 "cd /photos",\
 "sudo aws s3 cp s3://$SourceBucket/deploy-app.zip .",\
 "sudo unzip deploy-app.zip",\

@@ -35,9 +35,9 @@ Resources:
         Protocol: sqs
       - 
         Endpoint:
-        Fn::GetAtt:
-        - LabelsLambda
-        - Arn
+          Fn::GetAtt:
+          - LabelsLambda
+          - Arn
         Protocol: lambda
   
   UploadTopicPolicy:
@@ -73,6 +73,8 @@ Resources:
   QueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
+      Queues:
+        - !Ref UploadQueue
       PolicyDocument:
         Version: '2012-10-17'
         Id: QueuePolicy
@@ -93,9 +95,9 @@ Resources:
       BucketName: !Sub 'imagebucketsns${AWS::AccountId}'
       NotificationConfiguration:
         TopicConfigurations:
-        - 
-          Event: 's3:ObjectCreated:*'
-          Topic: !Ref UploadSNSTopic
+          - 
+            Event: 's3:ObjectCreated:*'
+            Topic: !Ref UploadSNSTopic
 
   ImageS3BucketPermission:
     Type: AWS::Lambda::Permission
@@ -103,7 +105,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt LabelsLambda.Arn
       Principal: sns.amazonaws.com
-      SourceArn: !Ref Topic
+      SourceArn: !Ref UploadSNSTopic
 
   LabelsLambda: 
     Type: AWS::Lambda::Function

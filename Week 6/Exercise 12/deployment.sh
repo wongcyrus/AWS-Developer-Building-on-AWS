@@ -40,8 +40,9 @@ cd LambdaImageLabels
 zip -r lambda.zip *
 aws s3 cp lambda.zip s3://$SourceBucket/
 cd ../../
-rm -rf exercise-lambda
+rm -rf exercise-sns-sqs
 
+## For new Stack Creation
 # random=$(shuf -i 2000-65000 -n 1)
 # aws cloudformation create-stack --stack-name edx-project-stack --template-body file://cfn.yaml \
 # --capabilities CAPABILITY_NAMED_IAM \
@@ -51,6 +52,8 @@ rm -rf exercise-lambda
 #                 ParameterKey=AppDomain,ParameterValue=uniqueedx$AWSAccountId$random
 # aws cloudformation wait stack-create-complete --stack-name edx-project-stack
 
+
+## For Stack update for previous exercise.
 aws cloudformation update-stack --stack-name edx-project-stack \
 --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
@@ -68,6 +71,8 @@ CommandId=$(aws ssm send-command --document-name "AWS-RunShellScript" \
 --comment "Deploy new code." \
 --instance-ids $InstanceIdWebServer1 $InstanceIdWebServer2 \
 --parameters commands=["sudo stop uwsgi",\
+"rm -rf /photos",\
+"mkdir /photos",\
 "cd /photos",\
 "sudo aws s3 cp s3://$SourceBucket/deploy-app.zip .",\
 "sudo unzip deploy-app.zip",\
@@ -79,7 +84,7 @@ sleep 5
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer1
 aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceIdWebServer2
 
-LabelsLambda=$(aws cloudformation describe-stacks --stack-name edx-vpc-stack \
+LabelsLambda=$(aws cloudformation describe-stacks --stack-name edx-project-stack \
 --query 'Stacks[0].Outputs[?OutputKey==`LabelsLambda`].OutputValue' --output text)
 
 

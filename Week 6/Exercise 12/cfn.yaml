@@ -107,7 +107,7 @@ Resources:
           - ''
           - - 'https://'
             - !GetAtt CDNStack.Outputs.DomainName
-        ImageS3Bucket: !GetAtt LabelsLambdaStack.Outputs.ImageS3Bucket
+        ImageS3Bucket: !GetAtt SNSSQSStack.Outputs.ImageS3Bucket
         DBPassword: !Ref DBPassword
         MyDBEndpoint: !GetAtt DBStack.Outputs.MyDBEndpoint
         
@@ -159,7 +159,7 @@ Outputs:
     Value: !GetAtt IAMStack.Outputs.SecretKey
     Description: AWSSecretKey of new user.
   ImageS3Bucket:
-    Value: !GetAtt LabelsLambdaStack.Outputs.ImageS3Bucket
+    Value: !GetAtt SNSSQSStack.Outputs.ImageS3Bucket
     Description: Bucket to save images.
   MyDBEndpoint:
     Value: !GetAtt DBStack.Outputs.MyDBEndpoint
