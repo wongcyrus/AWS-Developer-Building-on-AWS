@@ -53,15 +53,15 @@ rm -rf exercise-sns-sqs
 # aws cloudformation wait stack-create-complete --stack-name edx-project-stack
 
 
-## For Stack update for previous exercise.
-# aws cloudformation update-stack --stack-name edx-project-stack \
-# --template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
-# --capabilities CAPABILITY_NAMED_IAM \
-# --parameters    ParameterKey=Password,UsePreviousValue=true \
-#                 ParameterKey=DBPassword,UsePreviousValue=true \
-#                 ParameterKey=SourceBucket,UsePreviousValue=true \
-#                 ParameterKey=AppDomain,UsePreviousValue=true
-# aws cloudformation wait stack-update-complete --stack-name edx-project-stack
+## For Stack update for previous exercise. You need to run all of the below commands.
+aws cloudformation update-stack --stack-name edx-project-stack \
+--template-url https://s3.amazonaws.com/$SourceBucket/cfn.yaml \
+--capabilities CAPABILITY_NAMED_IAM \
+--parameters    ParameterKey=Password,UsePreviousValue=true \
+                ParameterKey=DBPassword,UsePreviousValue=true \
+                ParameterKey=SourceBucket,UsePreviousValue=true \
+                ParameterKey=AppDomain,UsePreviousValue=true
+aws cloudformation wait stack-update-complete --stack-name edx-project-stack
 
 InstanceIdWebServer1=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=WebServer1" \
 --query 'Reservations[0].Instances[0].InstanceId' --output text)
@@ -86,5 +86,5 @@ aws ssm get-command-invocation --command-id $CommandId --instance-id $InstanceId
 
 LabelsLambda=$(aws cloudformation describe-stacks --stack-name edx-project-stack \
 --query 'Stacks[0].Outputs[?OutputKey==`LabelsLambda`].OutputValue' --output text)
-
+aws lambda update-function-code --function-name $LabelsLambda --s3-bucket $SourceBucket --s3-key lambda.zip
 
