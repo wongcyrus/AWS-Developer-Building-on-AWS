@@ -24,7 +24,7 @@ Resources:
   ImageS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'imagebucket${AWS::AccountId}'
+      BucketName: !Sub 'imagebucketlambda${AWS::AccountId}'
       NotificationConfiguration:
         LambdaConfigurations:
         - Event: 's3:ObjectCreated:*'
@@ -38,11 +38,11 @@ Resources:
       Principal: s3.amazonaws.com
       SourceAccount: !Ref AWS::AccountId
       SourceArn: 
-        - Fn::Join:
+        Fn::Join:
            - ""
            - 
              - "arn:aws:s3:::"  
-             - !Sub 'imagebucket${AWS::AccountId}'
+             - !Sub 'imagebucketlambda${AWS::AccountId}'
 
   LabelsLambda: 
     Type: AWS::Lambda::Function
