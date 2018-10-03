@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: Building on AWS DB Tier Stack
+Parameters:
+  EC2VpcId:
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+  DBPassword:
+    NoEcho: 'true'
+    Type: String
+    Description: New account and RDS password
+    MinLength: '1'
+    MaxLength: '41'
+    ConstraintDescription: the password must be between 1 and 41 characters
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  EdxProjectCloud9Sg:
+    Type: AWS::EC2::SecurityGroup::Id
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    
+Resources:
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: MyDBSubnetGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  RDSCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: edx-photos-db
+      DatabaseName: Photos
+      MasterUsername: master
+      MasterUserPassword: !Ref DBPassword
+      EngineMode: serverless
+      ScalingConfiguration:
+        AutoPause: true
+        MaxCapacity: 4
+        MinCapacity: 2
+      Engine: aurora
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DBSecurityGroup
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: DB traffic
+      VpcId: !Ref EC2VpcId
+      SecurityGroupIngress:
+        - 
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebSecurityGroup
+        - 
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref EdxProjectCloud9Sg
+        - 
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref LambdaSecurityGroup               
+      SecurityGroupEgress:
+        -
+          IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+          
+Outputs:
+  MyDBEndpoint:
+    Value: !GetAtt RDSCluster.Endpoint.Address
+    Description: MyDB Endpoint

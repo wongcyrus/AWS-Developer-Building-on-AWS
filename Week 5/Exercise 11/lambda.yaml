@@ -53,7 +53,7 @@ Resources:
         S3Bucket: !Ref SourceBucket
         S3Key: lambda.zip
       Runtime: python3.6
-      Timeout: 60
+      Timeout: 120
       TracingConfig:
         Mode: "Active"
       VpcConfig:

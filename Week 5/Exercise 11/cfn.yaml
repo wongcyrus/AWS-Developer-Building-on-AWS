@@ -58,6 +58,7 @@ Resources:
         EC2VpcId: !GetAtt VPCStack.Outputs.VPC
         WebSecurityGroup: !GetAtt SecurityStack.Outputs.WebSecurityGroup
         EdxProjectCloud9Sg: !GetAtt Cloud9Stack.Outputs.EdxProjectCloud9Sg
+        LambdaSecurityGroup: !GetAtt SecurityStack.Outputs.LambdaSecurityGroup
         PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1
         PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2
         DBPassword: !Ref DBPassword

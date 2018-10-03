@@ -10,7 +10,6 @@ cp ../../Week\ 2/Exercise\ 5/iam.yaml .
 cp ../../Week\ 4/Exercise\ 9/cdn.yaml .
 cp ../../Week\ 4/Exercise\ 9/cloud9.yaml .
 cp ../../Week\ 4/Exercise\ 9/cognito.yaml .
-cp ../../Week\ 4/Exercise\ 9/db.yaml .
 cp ../../Week\ 4/Exercise\ 9/parameters.yaml .
 cp ../../Week\ 5/Exercise\ 10/web.yaml .
 aws s3 sync . s3://$SourceBucket 
@@ -19,7 +18,6 @@ rm iam.yaml
 rm cdn.yaml
 rm cloud9.yaml
 rm cognito.yaml
-rm db.yaml
 rm parameters.yaml
 rm web.yaml
 

@@ -84,19 +84,6 @@ Resources:
           ToPort: 65535
           CidrIp: 0.0.0.0/0
 
-  DBSecurityGroup: 
-    Type: AWS::RDS::DBSecurityGroup
-    Properties: 
-      EC2VpcId: !Ref EC2VpcId
-      DBSecurityGroupIngress:
-        -
-          EC2SecurityGroupId: !Ref WebSecurityGroup
-        -
-          EC2SecurityGroupId: !Ref EdxProjectCloud9Sg
-        -
-          EC2SecurityGroupId: !Ref LambdaSecurityGroup  
-      GroupDescription: Frontend Access
-      
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -119,9 +106,6 @@ Outputs:
   WebSecurityGroup:
     Value: !GetAtt WebSecurityGroup.GroupId
     Description: Web Security Group
-  DBSecurityGroup:
-    Value: !Ref DBSecurityGroup
-    Description: DB Security Group
   LambdaSecurityGroup:
     Value: !Ref LambdaSecurityGroup
     Description: Lambda Security Group
