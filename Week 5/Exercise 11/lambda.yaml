@@ -7,6 +7,8 @@ Parameters:
     Type: String
   PrivateSubnet1:
     Type: AWS::EC2::Subnet::Id 
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id 
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
   MyDBEndpoint:
@@ -31,14 +33,19 @@ Resources:
   ImageS3BucketPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !Ref LabelsLambda
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt LabelsLambda.Arn
       Principal: s3.amazonaws.com
-      SourceAccount: !Ref "AWS::AccountId"
-      SourceArn: !Sub "arn:aws:s3:::${ImageS3Bucket}"     
-      
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: 
+        - Fn::Join:
+           - ""
+           - 
+             - "arn:aws:s3:::"  
+             - !Sub 'imagebucket${AWS::AccountId}'
+
   LabelsLambda: 
-    Type: "AWS::Lambda::Function"
+    Type: AWS::Lambda::Function
     Properties: 
       Handler: lambda_function.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -54,6 +61,7 @@ Resources:
           - !Ref LambdaSecurityGroup
         SubnetIds:
           - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       Environment:
         Variables:
           DATABASE_HOST: !Ref MyDBEndpoint

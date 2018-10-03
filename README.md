@@ -4,7 +4,7 @@
 Alternative solution to complete lab exercises for the edx course.
 
 
-AWS Academy additional Permission
+AWS Academy Sandbox Lab, please set additional Permission.
 
 
 1. Add the below permssison to awsstudent's lab_policy

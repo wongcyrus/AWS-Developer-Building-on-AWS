@@ -43,3 +43,13 @@ chmod +x cleanup.sh
 . ./cleanup.sh
 
 
+
+Reference:
+
+
+View CloudFormation Logs in the Console
+
+
+https://aws.amazon.com/blogs/devops/view-cloudformation-logs-in-the-console/
+
+
