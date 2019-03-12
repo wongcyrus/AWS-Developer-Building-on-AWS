@@ -151,10 +151,16 @@ Resources:
     Type: 'AWS::ApiGateway::Deployment'
     Properties:
       RestApiId: !Ref Api
+
+  ProdStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
       StageName: Prod
-      StageDescription:
-        LoggingLevel: INFO
-  
+      Description: Prod Stage
+      RestApiId: !Ref Api
+      DeploymentId: !Ref Deployment
+      TracingEnabled: true
+
 Outputs:
   AlbDNSName:
     Value: !GetAtt LoadBalancer.DNSName
